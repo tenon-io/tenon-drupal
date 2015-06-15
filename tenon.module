@@ -1,5 +1,8 @@
 <?php
 
+// URL to Tenon.io API.
+define('TENON_IO_API_URL', 'https://tenon.io/api/');
+
 /**
  * Implements hook_menu().
  */
@@ -13,6 +16,7 @@ function tenon_menu() {
       'access arguments' => array('administer tenon settings'),
       'file' => 'tenon.admin.inc',
     ),
+    // @TODO: manage the action of this page.
     'tenon' => array(
       'title' => 'Tenon',
       'page callback' => 'drupal_get_form',
@@ -21,15 +25,15 @@ function tenon_menu() {
     ),
     'tenon/page' => array(
       'title' => 'Page report',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('tenon_admin_settings_form'),
+      'page callback' => 'tenon_trigger_page_report',
       'access arguments' => array('trigger page report'),
+      'file' => 'tenon.admin.inc',
     ),
     'tenon/spider' => array(
       'title' => 'Spider report',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('tenon_admin_settings_form'),
+      'page callback' => 'tenon_trigger_spider_report',
       'access arguments' => array('trigger spider report'),
+      'file' => 'tenon.admin.inc',
     ),
   );
 }
