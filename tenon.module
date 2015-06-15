@@ -1,0 +1,94 @@
+<?php
+
+/**
+ * Implements hook_menu().
+ */
+function tenon_menu() {
+  return array(
+    'admin/config/user-interface/tenon' => array(
+      'title' => 'Tenon.io settings',
+      'description' => 'Administer Tenon.io API connection settings.',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tenon_admin_settings_form'),
+      'access arguments' => array('administer tenon settings'),
+      'file' => 'tenon.admin.inc',
+    ),
+    'tenon' => array(
+      'title' => 'Tenon',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tenon_admin_settings_form'),
+      'description' => t('Tenon.io actions.'),
+    ),
+    'tenon/page' => array(
+      'title' => 'Page report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tenon_admin_settings_form'),
+      'access arguments' => array('trigger page report'),
+    ),
+    'tenon/spider' => array(
+      'title' => 'Spider report',
+      'page callback' => 'drupal_get_form',
+      'page arguments' => array('tenon_admin_settings_form'),
+      'access arguments' => array('trigger spider report'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_cp_toolbar_pre_render_alter().
+ */
+function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
+  // Build the new Tenon menu entry.
+  $l = menu_get_item('tenon');
+  $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = $l + array(
+    'attributes' => array(
+      'data-tooltip' => 'Tenon.io actions.',
+      'data-drawer' => 'tenon-drawer',
+    ),
+  );
+
+  // Build the children links.
+  $links = array();
+  $l = menu_get_item('tenon/page');
+  if ($l['access']) {
+    $links['tenon/page'] = $l;
+  }
+  $l = menu_get_item('tenon/spider');
+  if ($l['access']) {
+    $links['tenon/spider'] = $l;
+  }
+  $toolbar['toolbar_drawer']['tenon-drawer'] = array(
+    '#theme' => 'cp_toolbar_drawer_section',
+    '#attributes' => array('id' => 'tenon-drawer'),
+    '#paths' => array(
+      'tenon',
+    ),
+    'manage' => array(
+      '#theme' => 'links',
+      '#links' => $links,
+      '#attributes' => array(
+        'class' => 'toolbar-gear',
+      ),
+    ),
+  );
+}
+
+/**
+ * Implements hook_permission().
+ */
+function tenon_permission() {
+  return array(
+    'administer tenon settings' => array(
+      'title' => 'Administer Tenon.io settings',
+      'description' => 'Authorize users to configure the Tenon.io API settings.'
+    ),
+    'trigger page report' => array(
+      'title' => 'Trigger page report',
+      'description' => 'Authorize the user to trigger a report from Tenon.io for the current page he browses.'
+    ),
+    'trigger spider report' => array(
+      'title' => 'Administer Tenon.io settings',
+      'description' => 'Authorize the user to trigger a site spider report from Tenon.io.'
+    ),
+  );
+}
