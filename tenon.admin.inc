@@ -89,26 +89,39 @@ function tenon_admin_settings_form($form, &$form_state) {
     '#description' => t('Arbitrary string of text which will be sent as the User-Agent string when we request the URL you supply. This is particularly useful if your site does any user-agent sniffing.'),
     '#default_value' => variable_get('tenon_project_id', ''),
   );
-  // @TODO: apply digit only validation.
   $form['api_advanced_settings']['tenon_viewport_width'] = array(
     '#type' => 'textfield',
     '#title' => t('Viewport width'),
     '#maxlength' => 4,
     '#size' => 5,
+    '#required' => TRUE,
     '#description' => t('Width, in pixels, of the viewport for our headless browser. The value must between 0 and 9999.'),
     '#default_value' => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+    '#element_validate' => array('tenon_validate_numeric_value'),
   );
-  // @TODO: apply digit only validation.
   $form['api_advanced_settings']['tenon_viewport_height'] = array(
     '#type' => 'textfield',
     '#title' => t('Viewport height'),
     '#maxlength' => 4,
     '#size' => 5,
+    '#required' => TRUE,
     '#description' => t('Height, in pixels, of the viewport for our headless browser. The value must between 0 and 9999.'),
     '#default_value' => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+    '#element_validate' => array('tenon_validate_numeric_value'),
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Validation callback to check that a value is a positive numeric value.
+ */
+function tenon_validate_numeric_value($element) {
+  $value = $element['#value'];
+  $regexp = '@([^0-9]{1,4})@';
+  if ($value != preg_replace($regexp, '', $value)) {
+    form_error($element, t('The %name must be between 0 and 9999.', array('%name' => $element['#title'])));
+  }
 }
 
 /**
