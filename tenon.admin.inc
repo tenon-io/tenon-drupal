@@ -131,19 +131,19 @@ function tenon_trigger_page_report() {
   $i = 0;
   $data = '';
   $api_parameters = array(
-    'key' => $api_key,
-    'url' => $tested_url,
-    'appId' => variable_get('tenon_app_id', ''), // Remove if empty?
-    'projectID' => variable_get('tenon_project_id', ''), // Remove if empty?
-    'certainty' => variable_get('tenon_certainty', 0),
-    'importance' => variable_get('tenon_importance', 0),
-    'level' => variable_get('tenon_level', 'AAA'),
-    'priority' => variable_get('tenon_priority', 0),
-    'ref' => variable_get('tenon_ref', TRUE),
-    'store' => variable_get('tenon_store', 0),
-    'uaString' => variable_get('tenon_ua_string', ''),
-    'viewPortHeight' => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
-    'viewPortWidth' => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+    'key'             => $api_key,
+    'url'             => $tested_url,
+    'appId'           => variable_get('tenon_app_id', ''), // Remove if empty?
+    'projectID'       => variable_get('tenon_project_id', ''), // Remove if empty?
+    'certainty'       => variable_get('tenon_certainty', 0),
+    'importance'      => variable_get('tenon_importance', 0),
+    'level'           => variable_get('tenon_level', 'AAA'),
+    'priority'        => variable_get('tenon_priority', 0),
+    'ref'             => variable_get('tenon_ref', TRUE),
+    'store'           => variable_get('tenon_store', 0),
+    'uaString'        => variable_get('tenon_ua_string', ''),
+    'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+    'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
   );
   foreach ($api_parameters as $parameter_name => $parameter_value) {
     $separator = '';
@@ -217,30 +217,81 @@ function tenon_query_handle_errors($request) {
   }
   else {
     // Otherwise, decode the response from the API and analyze the error.
-    $data = drupal_json_decode($request->data);
-
     $message_type = 'error';
     $message_variables = array();
+    $data = drupal_json_decode($request->data);
+
+    // Analyze the status code returned by the query.
     switch ($data['status']) {
+      // Sample data to test?
       case 500:
         $message = 'An internal error occured, please try to submit your request again.';
         break;
       case 522:
+        // Sample data to test?
         $message = 'The connection to the resource timed out.';
         break;
       case 401:
-        $message = 'The connection to the API is unauthorized.';
-
         // Identity the cause of the unauthorized access.
         if ($data['code'] == 'api_credentials_invalid') {
           $message_type = 'warning';
-          $message = 'Please verify your API credentials. !settings_link';
-          $message_variables = array('!settings_link' => l(t('Settings page'), 'admin/config/user-interface/tenon'));
+          $message = 'Please verify your API credentials. !settings_link.';
+          $message_variables = array('!settings_link' => l(t('Verify the settings page'), 'admin/config/user-interface/tenon'));
+        }
+        else if ($data['code'] == 'monthly_limit_reached') {
+          // Sample data to test?
+          $message = 'It looks like you have reached your monthly limit.';
         }
         else {
-          if ($data['code'] == 'monthly_limit_reached') {
-            $message = 'It looks like you have reached your monthly limit.';
-          }
+          $message = 'The connection to the API is unauthorized.';
+        }
+        break;
+      case 400:
+        $message = 'The request is malformed.';
+
+        // Identity the cause of the unauthorized access.
+        switch ($data['code']) {
+          case 'invalid_param':
+            $message_type = 'warning';
+            $message = '!invalid_param_message <br /> Please verify your settings. !settings_link.';
+            $message_variables = array(
+              '!settings_link' => l(t('Access the settings page'), 'admin/config/user-interface/tenon'),
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'blank_url_or_src':
+            $message = '!invalid_param_message <br /> Please verify the tested URL.';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'bad_src':
+            $message = '!invalid_param_message <br /> Please verify the tested SRC.';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'abuse_detected':
+            $message = 'An abuse has been detected.';
+            break;
+          case 'required_param_missing':
+            $message = '!invalid_param_message';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'doc_source_too_big':
+            // Sample data to test?
+            $message = 'The content submitted is too big to be analyzed.';
+            break;
+          case 'improper_content_type':
+            // Sample data to test?
+            $message = 'The submitted resource does not appear to be a valid content type.';
+            break;
+          case 'url_request_failed':
+            // Sample data to test?
+            $message = 'The attempt to test the requested URL failed.';
+            break;
         }
         break;
       default:
