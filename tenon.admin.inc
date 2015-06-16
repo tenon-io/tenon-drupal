@@ -116,6 +116,7 @@ function tenon_admin_settings_form($form, &$form_state) {
  */
 function tenon_trigger_page_report() {
   $output = '';
+  $tested_url = 'http://examiner.com';
 
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
@@ -126,17 +127,41 @@ function tenon_trigger_page_report() {
     drupal_access_denied();
     return;
   }
+
+  $i = 0;
+  $data = '';
+  $api_parameters = array(
+    'key' => $api_key,
+    'url' => $tested_url,
+    'appId' => variable_get('tenon_app_id', ''), // Remove if empty?
+    'projectID' => variable_get('tenon_project_id', ''), // Remove if empty?
+    'certainty' => variable_get('tenon_certainty', 0),
+    'importance' => variable_get('tenon_importance', 0),
+    'level' => variable_get('tenon_level', 'AAA'),
+    'priority' => variable_get('tenon_priority', 0),
+    'ref' => variable_get('tenon_ref', TRUE),
+    'store' => variable_get('tenon_store', 0),
+    'uaString' => variable_get('tenon_ua_string', ''),
+    'viewPortHeight' => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+    'viewPortWidth' => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+  );
+  foreach ($api_parameters as $parameter_name => $parameter_value) {
+    $separator = '';
+    if ($i++ != 0) {
+      $separator = '&';
+    }
+    $data .= $separator . $parameter_name . '=' . urlencode($parameter_value);
+  }
+
   // Otherwise, let's eat the API.
-  $url = TENON_IO_API_URL . '';
-  $tested_url = 'http://examiner.com';
   $options = array(
     'headers' => array(
       'Content-Type' => 'application/x-www-form-urlencoded',
     ),
     'method' => 'POST',
-    'data' => 'key=' . $api_key . '&url=' . urlencode($tested_url),
+    'data' => $data,
   );
-  $request = drupal_http_request($url, $options);
+  $request = drupal_http_request(TENON_IO_API_URL, $options);
 
   // Analyze the request response.
   switch ($request->code) {
