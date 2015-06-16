@@ -26,13 +26,6 @@ function tenon_menu() {
       'access arguments' => array('administer tenon settings'),
       'file' => 'tenon.admin.inc',
     ),
-    // @TODO: manage the action of this page.
-    'tenon' => array(
-      'title' => 'Tenon',
-      'page callback' => 'drupal_get_form',
-      'page arguments' => array('tenon_admin_settings_form'),
-      'description' => t('Tenon.io actions.'),
-    ),
     'tenon/page' => array(
       'title' => 'Page report',
       'page callback' => 'tenon_trigger_page_report',
