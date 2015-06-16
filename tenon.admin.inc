@@ -115,8 +115,7 @@ function tenon_admin_settings_form($form, &$form_state) {
  * Trigger a page report.
  */
 function tenon_trigger_page_report() {
-  $output = '';
-  $tested_url = url(current_path(), array('absolute' => TRUE));;
+  $tested_url = url(current_path(), array('absolute' => TRUE));
 
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
@@ -128,6 +127,7 @@ function tenon_trigger_page_report() {
     return;
   }
 
+  // Build the query to the API.
   $i = 0;
   $data = '';
   $api_parameters = array(
@@ -153,7 +153,7 @@ function tenon_trigger_page_report() {
     $data .= $separator . $parameter_name . '=' . urlencode($parameter_value);
   }
 
-  // Otherwise, let's eat the API.
+  // Query the API.
   $options = array(
     'headers' => array(
       'Content-Type' => 'application/x-www-form-urlencoded',
@@ -161,47 +161,164 @@ function tenon_trigger_page_report() {
     'method' => 'POST',
     'data' => $data,
   );
-  $request = drupal_http_request(TENON_IO_API_URL, $options);
-
-  // Analyze the request response.
-  switch ($request->code) {
-    case 200:
-      // If we have a valid answer, decode the data.
-      $data = drupal_json_decode($request->data);
-
-      // Fetch the results and format the response for the end user.
-      $all_count = $data['resultSummary']['density']['allDensity'];
-      $errors_count = $data['resultSummary']['density']['errorDensity'];
-      $warnings_count = $data['resultSummary']['density']['warningDensity'];
-
-      // Celebrate if there are no error.
-      if ($all_count == 0) {
-        $output .= '<p>' . t('Congratulations, you do not have any warning or error on your page.') . '</p>';
-      }
-      else {
-        // Check if all the issues are errors.
-        if ($errors_count == $all_count) {
-          $output .= '<p>' . format_plural($errors_count, '1 error found for !tested_url', '!count_errors errors found for !tested_url', array('!count_errors' => $errors_count, '!tested_url' => $tested_url)) . '</p>';
-        }
-        // Then check if all the issues are warning.
-        else if ($warnings_count == $all_count) {
-          $output .= '<p>' . format_plural($errors_count, '1 warning found for !tested_url', '!count_warnings warnings found for !tested_url', array('!count_warnings' => $warnings_count, '!tested_url' => $tested_url)) . '</p>';
-        }
-        // If not, we need to display a mix of both.
-        else {
-          $output .= '<p>' . t('!count issues found for !tested_url.', array('!count' => $all_count, '!tested_url' => $tested_url));
-          $output .= format_plural($warnings_count, '1 warning', '!count_warnings warnings', array('!count_warnings' => $warnings_count));
-          $output .= t(' and ') . format_plural($errors_count, '1 error', '!count_errors errors', array('!count_errors' => $errors_count)) . '.</p>';
-        }
-      }
-      $output .= '<p>' . l(t('View full results on Tenon.io.'), '#TODO') . '</p>';
-      break;
-    default:
-      break;
-  }
+  $output = tenon_query_api($options, $tested_url);
   return $output;
 }
 
+/**
+ * Query the API.
+ *
+ * @param $options
+ *   Array of data describing the API to query. Those data are forwarded to
+ *   drupal_http_request().
+ * @param $tested_url
+ *   String of the URL to test the API against.
+ *
+ * @return
+ *   Returns the output of the query.
+ */
+function tenon_query_api($options, $tested_url) {
+  $request = drupal_http_request(TENON_IO_API_URL, $options);
+
+  // Check if the request went through without any trouble.
+  if ($request->code == 200) {
+    // If we have a valid answer, decode the data.
+    $data = drupal_json_decode($request->data);
+    return tenon_query_display_page_results($tested_url, $data);
+  }
+  else {
+    // Otherwise, explain the issue to the user and log it.
+    return tenon_query_handle_errors($request);
+  }
+}
+
+/**
+ * Analyzes the code returned by a query to the API.
+ *
+ * @param $request
+ *   Object coming from the drupal_http_request() query.
+ *
+ * @return
+ *   Return output detailing the cause of the error.
+ */
+function tenon_query_handle_errors($request) {
+  // Explain the issue to the user and log it.
+  // If we don't have data in the request, it means that the server did not
+  // answer and didn't provide its own metadata about the error.
+  if (!isset($request->data)) {
+    // In this case, log a generic error message.
+    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
+    drupal_set_message(t('The connection to the ressource timed out.'), 'error');
+    watchdog('tenon_api_error', 'Error !code: !error.', array(
+      '!code' => $request->code,
+      '!message' => $request->error
+    ));
+    return $output;
+  }
+  else {
+    // Otherwise, decode the response from the API and analyze the error.
+    $data = drupal_json_decode($request->data);
+
+    $message_type = 'error';
+    $message_variables = array();
+    switch ($data['status']) {
+      case 500:
+        $message = 'An internal error occured, please try to submit your request again.';
+        break;
+      case 522:
+        $message = 'The connection to the resource timed out.';
+        break;
+      case 401:
+        $message = 'The connection to the API is unauthorized.';
+
+        // Identity the cause of the unauthorized access.
+        if ($data['code'] == 'api_credentials_invalid') {
+          $message_type = 'warning';
+          $message = 'Please verify your API credentials. !settings_link';
+          $message_variables = array('!settings_link' => l(t('Settings page'), 'admin/config/user-interface/tenon'));
+        }
+        else {
+          if ($data['code'] == 'monthly_limit_reached') {
+            $message = 'It looks like you have reached your monthly limit.';
+          }
+        }
+        break;
+      default:
+        $message = 'An error occured.';
+        break;
+    }
+    // Display a message to the user and log the error.
+    drupal_set_message(t($message, $message_variables), $message_type);
+    watchdog('tenon_api_error', 'Error !code: !error.', array(
+      '!code' => $data['status'],
+      '!message' => $data['message']
+    ));
+
+    // @TODO: improve this user message.
+    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
+
+    // If we have a link to provide with more explanations of the cause of
+    // the error, provide it to the user.
+    if (isset($data->moreInfo)) {
+      $output .= '<p>' . l(t('View the error details'), $data->moreInfo) . '</p>';
+      return $output;
+    }
+    return $output;
+  }
+}
+
+/**
+ * Format the page test results.
+ *
+ * @param $tested_url
+ *   URL of the tested site.
+ * @param $data
+ *   Array of data returned by the API.
+ *
+ * @return
+ *   Output of the formatted results.
+ */
+function tenon_query_display_page_results($tested_url, $data) {
+  // Fetch the results and format the response for the end user.
+  $all_count = $data['resultSummary']['density']['allDensity'];
+  $errors_count = $data['resultSummary']['density']['errorDensity'];
+  $warnings_count = $data['resultSummary']['density']['warningDensity'];
+
+  // Celebrate if there are no error.
+  $output = '';
+  if ($all_count == 0) {
+    $output .= '<p>' . t('Congratulations, you do not have any warning or error on your page.') . '</p>';
+  }
+  else {
+    // Check if all the issues are errors.
+    if ($errors_count == $all_count) {
+      $output .= '<p>' . format_plural($errors_count, '1 error found for !tested_url', '!count_errors errors found for !tested_url', array(
+          '!count_errors' => $errors_count,
+          '!tested_url' => $tested_url
+        )) . '</p>';
+    }
+    // Then check if all the issues are warning.
+    else {
+      if ($warnings_count == $all_count) {
+        $output .= '<p>' . format_plural($errors_count, '1 warning found for !tested_url', '!count_warnings warnings found for !tested_url', array(
+            '!count_warnings' => $warnings_count,
+            '!tested_url' => $tested_url
+          )) . '</p>';
+      }
+      // If not, we need to display a mix of both.
+      else {
+        $output .= '<p>' . t('!count issues found for !tested_url.', array(
+            '!count' => $all_count,
+            '!tested_url' => $tested_url
+          ));
+        $output .= format_plural($warnings_count, '1 warning', '!count_warnings warnings', array('!count_warnings' => $warnings_count));
+        $output .= t(' and ') . format_plural($errors_count, '1 error', '!count_errors errors', array('!count_errors' => $errors_count)) . '.</p>';
+      }
+    }
+  }
+  $output .= '<p>' . l(t('View full results on Tenon.io.'), '#TODO') . '</p>';
+  return $output;
+}
 
 /**
  * Trigger a spider report.
