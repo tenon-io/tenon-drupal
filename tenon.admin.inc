@@ -116,7 +116,7 @@ function tenon_admin_settings_form($form, &$form_state) {
  */
 function tenon_trigger_page_report() {
   $output = '';
-  $tested_url = 'http://examiner.com';
+  $tested_url = url(current_path(), array('absolute' => TRUE));;
 
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
