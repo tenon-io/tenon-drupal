@@ -29,13 +29,13 @@ function tenon_menu() {
     'tenon/page' => array(
       'title' => 'Page report',
       'page callback' => 'tenon_trigger_page_report',
-      'access arguments' => array('trigger page report'),
+      'access arguments' => array('tenon trigger page report'),
       'file' => 'tenon.admin.inc',
     ),
     'tenon/spider' => array(
       'title' => 'Spider report',
       'page callback' => 'tenon_trigger_spider_report',
-      'access arguments' => array('trigger spider report'),
+      'access arguments' => array('tenon trigger spider report'),
       'file' => 'tenon.admin.inc',
     ),
   );
@@ -46,38 +46,45 @@ function tenon_menu() {
  */
 function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
   // Build the new Tenon menu entry.
-  $l = menu_get_item('tenon');
-  $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = $l + array(
-    'attributes' => array(
-      'data-tooltip' => 'Tenon.io actions.',
-      'data-drawer' => 'tenon-drawer',
-    ),
-  );
+  $l_page = menu_get_item('tenon/page');
+  $l_spider = menu_get_item('tenon/spider');
 
-  // Build the children links.
-  $links = array();
-  $l = menu_get_item('tenon/page');
-  if ($l['access']) {
-    $links['tenon/page'] = $l;
-  }
-  $l = menu_get_item('tenon/spider');
-  if ($l['access']) {
-    $links['tenon/spider'] = $l;
-  }
-  $toolbar['toolbar_drawer']['tenon-drawer'] = array(
-    '#theme' => 'cp_toolbar_drawer_section',
-    '#attributes' => array('id' => 'tenon-drawer'),
-    '#paths' => array(
-      'tenon',
-    ),
-    'manage' => array(
-      '#theme' => 'links',
-      '#links' => $links,
-      '#attributes' => array(
-        'class' => 'toolbar-gear',
+  // Display the toolbar menu if the user can access a page.
+  if ($l_page['access'] || $l_spider['access']) {
+    $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = array(
+      'title' => t('Tenon'),
+      'href' => ($l_page['access']) ? 'tenon/page' : 'tenon/spider',
+      'html' => TRUE,
+      '#paths' => array(),
+      'attributes' => array(
+        'data-tooltip' => 'Tenon.io actions.',
+        'data-drawer' => 'tenon-drawer',
       ),
-    ),
-  );
+    );
+
+    // Build the children links.
+    $links = array();
+    if ($l_page['access']) {
+      $links['tenon/page'] = $l_page;
+    }
+    if ($l_spider['access']) {
+      $links['tenon/spider'] = $l_spider;
+    }
+    $toolbar['toolbar_drawer']['tenon-drawer'] = array(
+      '#theme' => 'cp_toolbar_drawer_section',
+      '#attributes' => array('id' => 'tenon-drawer'),
+      '#paths' => array(
+        'tenon',
+      ),
+      'manage' => array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#attributes' => array(
+          'class' => 'toolbar-gear',
+        ),
+      ),
+    );
+  }
 }
 
 /**
@@ -89,11 +96,11 @@ function tenon_permission() {
       'title' => 'Administer Tenon.io settings',
       'description' => 'Authorize users to configure the Tenon.io API settings.'
     ),
-    'trigger page report' => array(
+    'tenon trigger page report' => array(
       'title' => 'Trigger page report',
       'description' => 'Authorize the user to trigger a report from Tenon.io for the current page he browses.'
     ),
-    'trigger spider report' => array(
+    'tenon trigger spider report' => array(
       'title' => 'Administer Tenon.io settings',
       'description' => 'Authorize the user to trigger a site spider report from Tenon.io.'
     ),
