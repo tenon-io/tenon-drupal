@@ -3,6 +3,16 @@
 // URL to Tenon.io API.
 define('TENON_IO_API_URL', 'https://tenon.io/api/');
 
+// Importance criteria.
+define('TENON_IMPORTANCE_NONE', 0);
+define('TENON_IMPORTANCE_LOW', 1);
+define('TENON_IMPORTANCE_MEDIUM', 2);
+define('TENON_IMPORTANCE_HIGH', 3);
+
+// Headless browser default viewport dimensions.
+define('TENON_VIEWPORT_DEFAULT_HEIGHT', 768);
+define('TENON_VIEWPORT_DEFAULT_WIDTH', 1024);
+
 /**
  * Implements hook_menu().
  */
