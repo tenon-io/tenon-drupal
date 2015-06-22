@@ -1,6 +1,16 @@
 <?php
 
 /**
+ * Implements hook_install().
+ */
+function tenon_install() {
+  drupal_set_message(t('Thank you for installing the Tenon.io connector. Please !api_settings_link', array('!api_settings_link' => l('setup your connection to our API.', 'admin/config/user-interface/tenon'))));
+  // The toolbar cache is bad so i'm using the armaggedon to display my new
+  // menu in the toolbar.
+  cache_clear_all();
+}
+
+/**
  * Implements hook_uninstall().
  */
 function tenon_uninstall() {
