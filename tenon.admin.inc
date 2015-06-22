@@ -8,6 +8,13 @@ function tenon_admin_settings_form($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Tenon.io API settings'),
   );
+  $form['api_settings']['tenon_api_endpoint_page'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Page test endpoint URL'),
+    '#required' => TRUE,
+    '#description' => t('URL of the endpoint for a single page test. Default url is !default_url.', array('!default_url' => TENON_IO_API_URL)),
+    '#default_value' => variable_get('tenon_api_endpoint_page', TENON_IO_API_URL),
+  );
   $form['api_settings']['tenon_api_key'] = array(
     '#type' => 'textfield',
     '#title' => t('API key'),
@@ -169,6 +176,7 @@ function tenon_trigger_page_report() {
   }
 
   // Query the API.
+  $endpoint_url = variable_get('tenon_api_endpoint_page', TENON_IO_API_URL);
   $options = array(
     'headers' => array(
       'Content-Type' => 'application/x-www-form-urlencoded',
@@ -176,13 +184,16 @@ function tenon_trigger_page_report() {
     'method' => 'POST',
     'data' => $data,
   );
-  $output = tenon_query_api($options, $tested_url);
+
+  $output = tenon_query_api($endpoint_url, $options, $tested_url);
   return $output;
 }
 
 /**
  * Query the API.
  *
+ * @param $endpoint_url
+ *   URL to send the request to.
  * @param $options
  *   Array of data describing the API to query. Those data are forwarded to
  *   drupal_http_request().
@@ -192,8 +203,8 @@ function tenon_trigger_page_report() {
  * @return
  *   Returns the output of the query.
  */
-function tenon_query_api($options, $tested_url) {
-  $request = drupal_http_request(TENON_IO_API_URL, $options);
+function tenon_query_api($endpoint_url, $options, $tested_url) {
+  $request = drupal_http_request($endpoint_url, $options);
 
   // Check if the request went through without any trouble.
   if ($request->code == 200) {
