@@ -1,0 +1,21 @@
+<?php
+
+/**
+ * Implements hook_uninstall().
+ */
+function tenon_uninstall() {
+  // Clean our room.
+  variable_del('tenon_api_endpoint_page');
+  variable_del('tenon_api_key');
+  variable_del('tenon_app_id');
+  variable_del('tenon_certainty');
+  variable_del('tenon_importance');
+  variable_del('tenon_level');
+  variable_del('tenon_priority');
+  variable_del('tenon_ref_information');
+  variable_del('tenon_store_information');
+  variable_del('tenon_project_id');
+  variable_del('tenon_ua_string');
+  variable_del('tenon_viewport_width');
+  variable_del('tenon_viewport_height');
+}
