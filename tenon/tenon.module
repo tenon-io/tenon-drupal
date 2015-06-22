@@ -32,10 +32,12 @@ function tenon_menu() {
       'access arguments' => array('tenon trigger page report'),
       'file' => 'tenon.admin.inc',
     ),
+// @TODO: Enable once the endpoint is created.
     'tenon/spider' => array(
       'title' => 'Spider report',
       'page callback' => 'tenon_trigger_spider_report',
-      'access arguments' => array('tenon trigger spider report'),
+//      'access arguments' => array('tenon trigger spider report'),
+      'access callback' => FALSE,
       'file' => 'tenon.admin.inc',
     ),
   );
