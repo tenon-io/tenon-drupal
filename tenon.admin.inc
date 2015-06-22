@@ -129,7 +129,9 @@ function tenon_validate_numeric_value($element) {
  */
 function tenon_trigger_page_report() {
   $tested_url = url(current_path(), array('absolute' => TRUE));
-
+  if (!empty($_GET['url'])) {
+    $tested_url = $_GET['url'];
+  }
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {

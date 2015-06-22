@@ -65,6 +65,8 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
     // Build the children links.
     $links = array();
     if ($l_page['access']) {
+      $tested_url = url(current_path(), array('absolute' => TRUE));
+      $l_page['query'] = array('url' => $tested_url);
       $links['tenon/page'] = $l_page;
     }
     if ($l_spider['access']) {
