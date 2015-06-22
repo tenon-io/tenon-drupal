@@ -356,50 +356,31 @@ function tenon_query_handle_errors($request) {
  *   Output of the formatted results.
  */
 function tenon_query_display_page_results($tested_url, $data) {
-  // Fetch the results and format the response for the end user.
-  $all_count = $data['resultSummary']['density']['allDensity'];
-  $errors_count = $data['resultSummary']['density']['errorDensity'];
-  $warnings_count = $data['resultSummary']['density']['warningDensity'];
+  // Extract the results and format the response for the end user.
+  $issue_count    = $data['resultSummary']['issues']['totalIssues'];
+  $error_count    = $data['resultSummary']['issues']['totalErrors'];
+  $warning_count  = $data['resultSummary']['issues']['totalWarnings'];
+  $report_url     = 'https://tenon.io/report.php?id=' . $data['request']['reportID'];
 
-  // Celebrate if there are no error.
-  $output = '';
-  if ($all_count == 0) {
-    $output .= '<p>' . t('Congratulations, you do not have any warning or error on your page.') . '</p>';
-  }
-  else {
-    // Check if all the issues are errors.
-    if ($errors_count == $all_count) {
-      $output .= '<p>' . format_plural($errors_count, '1 error found for !tested_url', '!count_errors errors found for !tested_url', array(
-          '!count_errors' => $errors_count,
-          '!tested_url' => $tested_url
-        )) . '</p>';
-    }
-    // Then check if all the issues are warning.
-    else {
-      if ($warnings_count == $all_count) {
-        $output .= '<p>' . format_plural($errors_count, '1 warning found for !tested_url', '!count_warnings warnings found for !tested_url', array(
-            '!count_warnings' => $warnings_count,
-            '!tested_url' => $tested_url
-          )) . '</p>';
-      }
-      // If not, we need to display a mix of both.
-      else {
-        $output .= '<p>' . t('!count issues found for !tested_url.', array(
-            '!count' => $all_count,
-            '!tested_url' => $tested_url
-          ));
-        $output .= format_plural($warnings_count, '1 warning', '!count_warnings warnings', array('!count_warnings' => $warnings_count));
-        $output .= t(' and ') . format_plural($errors_count, '1 error', '!count_errors errors', array('!count_errors' => $errors_count)) . '.</p>';
-      }
-    }
-  }
-  $output .= '<p>' . l(t('View full results on Tenon.io.'), '#TODO') . '</p>';
-  return $output;
+  $variables = array(
+    'report_url' => l(t('View full results on Tenon.io'), $report_url),
+    'error_count' => $error_count,
+    'warning_count' => $warning_count,
+    'issues_count' => $issue_count,
+    'a_level_count' => $data['resultSummary']['issuesByLevel']['A']['count'],
+    'a_level_percentage' => $data['resultSummary']['issuesByLevel']['A']['pct'],
+    'aa_level_count' => $data['resultSummary']['issuesByLevel']['AA']['count'],
+    'aa_level_percentage' => $data['resultSummary']['issuesByLevel']['AA']['pct'],
+    'aaa_level_count' => $data['resultSummary']['issuesByLevel']['AAA']['count'],
+    'aaa_level_percentage' => $data['resultSummary']['issuesByLevel']['AAA']['pct'],
+    'tested_url' => $tested_url,
+  );
+  return theme('tenon_results_report', $variables);
 }
 
 /**
  * Trigger a spider report.
  */
 function tenon_trigger_spider_report() {
-
+  // @TODO once the API endpoint exists.
 }

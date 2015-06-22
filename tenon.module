@@ -108,3 +108,26 @@ function tenon_permission() {
     ),
   );
 }
+
+/**
+ * Implements hook_theme().
+ */
+function tenon_theme($existing, $type, $theme, $path) {
+  return array(
+    'tenon_results_report' => array(
+      'variables' => array(
+        'report_url' => '',
+        'error_count' => 0,
+        'warning_count' => 0,
+        'issues_count' => 0,
+        'level_a' => 0,
+        'percent_a' => 0,
+        'level_aa' => 0,
+        'percent_aa' => 0,
+        'level_aaa' => 0,
+        'percent_aaa' => 0,
+      ),
+      'template' => 'tenon-report',
+    ),
+  );
+}
