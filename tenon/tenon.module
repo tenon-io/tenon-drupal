@@ -133,3 +133,23 @@ function tenon_theme($existing, $type, $theme, $path) {
     ),
   );
 }
+
+/**
+ * Implements hook_admin_menu_output_alter().
+ */
+function tenon_admin_menu_output_alter(&$content) {
+  // Add the Tenon.io menu entry if the user can access this page report.
+  $page_test = menu_get_item('tenon/page');
+  if ($page_test['access']) {
+    $page_url = url(current_path(), array('absolute' => TRUE));
+    $content['icon']['icon']['tenon'] = array(
+      '#title' => t('Tenon.io page report'),
+      '#weight' => 1,
+      '#access' => $page_test['access'],
+      '#href' => 'tenon/page',
+      '#options' => array(
+        'query' => array('url' => $page_url),
+      ),
+    );
+  }
+}
