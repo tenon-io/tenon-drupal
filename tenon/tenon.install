@@ -4,6 +4,16 @@
  * Implements hook_install().
  */
 function tenon_install() {
+  // Add a link to the page test in the Toolbar.
+  if (module_exists('toolbar')) {
+    module_load_include('inc', 'shortcut', 'shortcut.admin');
+    $shortcut_set = shortcut_set_load('shortcut-set-1');
+    $shortcut_link = array('link_title' => 'Tenon.io single page', 'link_path' => 'tenon/page');
+    $shortcut_link['menu_name'] = $shortcut_set->set_name;
+    shortcut_admin_add_link($shortcut_link, $shortcut_set, shortcut_max_slots());
+    shortcut_set_save($shortcut_set);
+  }
+
   drupal_set_message(t('Thank you for installing the Tenon.io connector. Please !api_settings_link', array('!api_settings_link' => l('setup your connection to our API.', 'admin/config/user-interface/tenon'))));
   // The toolbar cache is bad so i'm using the armaggedon to display my new
   // menu in the toolbar.
