@@ -53,8 +53,11 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
 
   // Display the toolbar menu if the user can access a page.
   if ($l_page['access'] || $l_spider['access']) {
+    // Attach a CSS file.
+    $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
+
     $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = array(
-      'title' => t('Tenon'),
+      'title' => '<span class="tenon-link">' . t('Accessibility Check') . '</span>',
       'href' => ($l_page['access']) ? 'tenon/page' : 'tenon/spider',
       'html' => TRUE,
       '#paths' => array(),
