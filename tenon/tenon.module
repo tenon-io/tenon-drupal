@@ -53,8 +53,25 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
 
   // Display the toolbar menu if the user can access a page.
   if ($l_page['access'] || $l_spider['access']) {
-    // Attach a CSS file.
+    // Attach a JS & CSS file.
+    $settings = array(
+      'key'             => variable_get('tenon_api_key', NULL),
+      'url'             => 'http://drupalfr.org',
+      'appId'           => variable_get('tenon_app_id', ''), // Remove if empty?
+      'projectID'       => variable_get('tenon_project_id', ''), // Remove if empty?
+      'certainty'       => variable_get('tenon_certainty', 0),
+      'importance'      => variable_get('tenon_importance', 0),
+      'level'           => variable_get('tenon_level', 'AAA'),
+      'priority'        => variable_get('tenon_priority', 0),
+      'ref'             => variable_get('tenon_ref', TRUE),
+      'store'           => variable_get('tenon_store', 0),
+      'uaString'        => variable_get('tenon_ua_string', ''),
+      'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+      'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+    );
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
+    $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
+    $toolbar['#attached']['js'][] = array('type' => 'setting', 'data' => array('tenon' => $settings));
 
     $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = array(
       'title' => '<span class="tenon-link">' . t('Accessibility Check') . '</span>',
@@ -72,6 +89,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
     if ($l_page['access']) {
       $tested_url = url(current_path(), array('absolute' => TRUE));
       $l_page['query'] = array('url' => $tested_url);
+      $l_page['attributes']['data-tenon'] = 'page_report';
       $links['tenon/page'] = $l_page;
     }
     if ($l_spider['access']) {

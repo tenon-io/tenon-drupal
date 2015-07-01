@@ -2,3 +2,31 @@
   background: transparent url('logo_tenon.png') no-repeat top left;
   padding-left: 22px;
 }
+
+#toolbar #tenon-report-summary-count {
+  background-color: darkorange;
+  color: #fff;
+  display: inline-block;
+  font-size: 12px;
+  font-weight: bold !important;
+  line-height: 1;
+  margin: -5px 2px -5px 9px;
+  min-width: 10px;
+  padding: 3px 5px 4px !important;
+  text-align: center;
+  vertical-align: baseline;
+  white-space: nowrap;
+}
+
+div.hopscotch-bubble.tenon-notifications .hopscotch-bubble-content {
+  margin: 0;
+}
+
+div.hopscotch-bubble.tenon-notifications .hopscotch-bubble-number {
+  display: none;
+}
+
+.tenon-notifications-readmore {
+  margin-top: 1em;
+  margin-bottom: -3.5em;
+}
