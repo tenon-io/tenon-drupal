@@ -68,6 +68,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
       'uaString'        => variable_get('tenon_ua_string', ''),
       'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
       'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+      'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
     );
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
     $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
