@@ -25,8 +25,8 @@
         Drupal.cp_toolbar.drawer_close();
 
         $('html, body').animate({scrollTop: 0}, '500', 'swing', function () {
-          var hopscoth_selector = '.hopscotch-bubble';
-          $(hopscoth_selector).addClass('animated');
+          var hopscotch_selector = '.hopscotch-bubble';
+          $(hopscotch_selector).addClass('animated');
 
           var items = tenon_notification_generate_report(settings.tenon);
 
@@ -41,11 +41,11 @@
 
           // Temporary solution to simulate a call to the API.
           setTimeout(function () {
-            $('.tenon-notifications .hopscotch-content .description').html('OK');
+            $('.tenon-notifications .hopscotch-content .description').html('<p>OK</p>');
           }, 2000);
 
           // Removes animation for each step and let us to target just this tour in CSS rules.
-          $(hopscoth_selector).removeClass('animated').addClass('tenon-notifications');
+          $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
         });
       });
     }
