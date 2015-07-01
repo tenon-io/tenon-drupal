@@ -139,11 +139,12 @@ function tenon_trigger_page_report() {
   if (!empty($_GET['url'])) {
     $tested_url = $_GET['url'];
   }
+  $tested_url = 'http://drupalfr.org';
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {
     // If not, be kind and invite him to do so.
-    drupal_set_message(t('Wait! We are not able to generate a report while you do not provide us an API key! !api_settings_page', array('!api_settings_page' => l('Fix it!', 'admin/config/user-interface/tenon'))), 'warning');
+    drupal_set_message(t('Wait! We are not able to generate a report while you do not provide us an API key! !api_settings_page', array('!api_settings_page' => l(t('Fix it!'), 'admin/config/user-interface/tenon'))), 'warning');
     watchdog('tenon_api', 'Page report: API request attempt without credentials.');
     drupal_access_denied();
     return;
@@ -199,18 +200,29 @@ function tenon_trigger_page_report() {
  *   drupal_http_request().
  * @param $tested_url
  *   String of the URL to test the API against.
+ * @param $format
+ *   String designating the format in which the output should be generated.
+ *   Two values are allowed: full or summary.
  *
  * @return
  *   Returns the output of the query.
  */
-function tenon_query_api($endpoint_url, $options, $tested_url) {
+function tenon_query_api($endpoint_url, $options, $tested_url, $format = 'full') {
   $request = drupal_http_request($endpoint_url, $options);
 
   // Check if the request went through without any trouble.
   if ($request->code == 200) {
     // If we have a valid answer, decode the data.
     $data = drupal_json_decode($request->data);
-    return tenon_query_display_page_results($tested_url, $data);
+    switch ($format) {
+      case 'summary':
+        return tenon_query_display_page_results_summary($tested_url, $data);
+        break;
+      case 'full':
+      default:
+        return tenon_query_display_page_results_full($tested_url, $data);
+        break;
+    }
   }
   else {
     // Otherwise, explain the issue to the user and log it.
@@ -355,7 +367,7 @@ function tenon_query_handle_errors($request) {
  * @return
  *   Output of the formatted results.
  */
-function tenon_query_display_page_results($tested_url, $data) {
+function tenon_query_display_page_results_full($tested_url, $data) {
   // Extract the results and format the response for the end user.
   $issue_count    = $data['resultSummary']['issues']['totalIssues'];
   $error_count    = $data['resultSummary']['issues']['totalErrors'];
@@ -375,7 +387,32 @@ function tenon_query_display_page_results($tested_url, $data) {
     'aaa_level_percentage' => $data['resultSummary']['issuesByLevel']['AAA']['pct'],
     'tested_url' => $tested_url,
   );
-  return theme('tenon_results_report', $variables);
+  return theme('tenon_results_report_full', $variables);
+}
+
+/**
+ * Format the page test results.
+ *
+ * @param $tested_url
+ *   URL of the tested site.
+ * @param $data
+ *   Array of data returned by the API.
+ *
+ * @return
+ *   Output of the formatted results.
+ */
+function tenon_query_display_page_results_summary($tested_url, $data) {
+  // Extract the results and format the response for the end user.
+  $issue_count    = $data['resultSummary']['issues']['totalIssues'];
+  $error_count    = $data['resultSummary']['issues']['totalErrors'];
+  $warning_count  = $data['resultSummary']['issues']['totalWarnings'];
+
+  $variables = array(
+    'error_count' => $error_count,
+    'warning_count' => $warning_count,
+    'issues_count' => $issue_count,
+  );
+  return theme('tenon_results_report_summary', $variables);
 }
 
 /**
@@ -383,4 +420,76 @@ function tenon_query_display_page_results($tested_url, $data) {
  */
 function tenon_trigger_spider_report() {
   // @TODO once the API endpoint exists.
+}
+
+
+function tenon_trigger_ajax($tested_url) {
+  $tested_url = 'http://drupalfr.org';
+
+  // First of all, check if the user provided an API key.
+  $api_key = variable_get('tenon_api_key', NULL);
+  if (empty($api_key)) {
+    // If not, be kind and invite him to do so.
+    $content = array(
+      'content' => t('Wait! We are not able to generate a report while you do not provide us an API key!'),
+      'link' => l(t('Fix it!'), 'admin/config/user-interface/tenon'),
+    );
+    watchdog('tenon_api', 'Page report: API request attempt without credentials.');
+  }
+  else {
+    // Build the query for the API.
+    list($endpoint_url, $options) = tenon_query_build($tested_url, $api_key);
+
+    $output = tenon_query_api($endpoint_url, $options, $tested_url, 'summary');
+    $content = array(
+      'content' => $output,
+      'link' => l(t('Fix it!'), 'admin/config/user-interface/tenon'),
+    );
+  }
+
+  drupal_json_output($content);
+  drupal_exit();
+}
+
+/**
+ * @param $tested_url
+ * @param $api_key
+ * @return array
+ */
+function tenon_query_build($tested_url, $api_key) {
+  $i = 0;
+  $data = '';
+  $api_parameters = array(
+    'key' => $api_key,
+    'url' => $tested_url,
+    'appId' => variable_get('tenon_app_id', ''), // Remove if empty?
+    'projectID' => variable_get('tenon_project_id', ''), // Remove if empty?
+    'certainty' => variable_get('tenon_certainty', 0),
+    'importance' => variable_get('tenon_importance', 0),
+    'level' => variable_get('tenon_level', 'AAA'),
+    'priority' => variable_get('tenon_priority', 0),
+    'ref' => variable_get('tenon_ref', TRUE),
+    'store' => variable_get('tenon_store', 0),
+    'uaString' => variable_get('tenon_ua_string', ''),
+    'viewPortHeight' => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+    'viewPortWidth' => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+  );
+  foreach ($api_parameters as $parameter_name => $parameter_value) {
+    $separator = '';
+    if ($i++ != 0) {
+      $separator = '&';
+    }
+    $data .= $separator . $parameter_name . '=' . urlencode($parameter_value);
+  }
+
+  // Query the API.
+  $endpoint_url = variable_get('tenon_api_endpoint_page', TENON_IO_API_URL);
+  $options = array(
+    'headers' => array(
+      'Content-Type' => 'application/x-www-form-urlencoded',
+    ),
+    'method' => 'POST',
+    'data' => $data,
+  );
+  return array($endpoint_url, $options);
 }

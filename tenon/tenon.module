@@ -40,6 +40,14 @@ function tenon_menu() {
       'access callback' => FALSE,
       'file' => 'tenon.admin.inc',
     ),
+    'tenon/ajax/%' => array(
+      'title' => 'Ajax test',
+      'delivery callback' => 'ajax_deliver',
+      'page callback' => 'tenon_trigger_ajax',
+      'page arguments' => array(2),
+      'access arguments' => array('tenon trigger page report'),
+      'file' => 'tenon.admin.inc',
+    ),
   );
 }
 
@@ -138,7 +146,7 @@ function tenon_permission() {
  */
 function tenon_theme($existing, $type, $theme, $path) {
   return array(
-    'tenon_results_report' => array(
+    'tenon_results_report_full' => array(
       'variables' => array(
         'report_url' => '',
         'error_count' => 0,
@@ -151,7 +159,15 @@ function tenon_theme($existing, $type, $theme, $path) {
         'level_aaa' => 0,
         'percent_aaa' => 0,
       ),
-      'template' => 'tenon-report',
+      'template' => 'tenon-report-full',
+    ),
+    'tenon_results_report_summary' => array(
+      'variables' => array(
+        'error_count' => 0,
+        'warning_count' => 0,
+        'issues_count' => 0,
+      ),
+      'template' => 'tenon-report-summary',
     ),
   );
 }

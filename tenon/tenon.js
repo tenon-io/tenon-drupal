@@ -40,9 +40,52 @@
           hopscotch.startTour(tour);
 
           // Temporary solution to simulate a call to the API.
-          setTimeout(function () {
-            $('.tenon-notifications .hopscotch-content .description').html('<p>OK</p>');
-          }, 2000);
+          //setTimeout(function () {
+          //  $('.tenon-notifications .hopscotch-content .description').html('<p>OK</p>');
+          //}, 2000);
+
+          // Prepare data for the API request.
+          var i = 0;
+          var data = '';
+          var api_parameters = {
+            'key': settings.tenon.key,
+            'url': settings.tenon.url,
+            'appId': settings.tenon.appId,
+            'projectID': settings.tenon.projectID,
+            'certainty': settings.tenon.certainty,
+            'importance': settings.tenon.importance,
+            'level': settings.tenon.level,
+            'priority': settings.tenon.priority,
+            'ref': settings.tenon.ref,
+            'store': settings.tenon.store,
+            'uaString': settings.tenon.uaString,
+            'viewPortHeight': settings.tenon.viewPortHeight,
+            'viewPortWidth': settings.tenon.viewPortWidth
+          };
+
+          for (var parameter in api_parameters ) {
+            var separator = '';
+            if (i++ != 0) {
+              separator = '&';
+            }
+            data += separator + parameter + '=' + encodeURIComponent(api_parameters[parameter]);
+          }
+
+          // Do the actual call.
+          var url = 'http://tenon.io/api/';
+          var options = {
+            'headers': {
+              'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            'method': 'POST',
+            'data': data
+          };
+          //$.post(url, options);
+          $.get('/tenon/ajax/url').done(function(data) {
+            console.log(data);
+            $('.tenon-notifications .hopscotch-content .description').html(data.content);
+          });
+
 
           // Removes animation for each step and let us to target just this tour in CSS rules.
           $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
@@ -61,44 +104,6 @@
    *   Array of data for the Tour module.
    */
   function tenon_notification_generate_report(settings) {
-    // Prepare data for the API request.
-    var i = 0;
-    var data = '';
-    var api_parameters = {
-      'key': settings.key,
-      'url': settings.url,
-      'appId': settings.appId,
-      'projectID': settings.projectID,
-      'certainty': settings.certainty,
-      'importance': settings.importance,
-      'level': settings.level,
-      'priority': settings.priority,
-      'ref': settings.ref,
-      'store': settings.store,
-      'uaString': settings.uaString,
-      'viewPortHeight': settings.viewPortHeight,
-      'viewPortWidth': settings.viewPortWidth
-    };
-
-    for (var parameter in api_parameters ) {
-      var separator = '';
-      if (i++ != 0) {
-        separator = '&';
-      }
-      data += separator + parameter + '=' + encodeURIComponent(api_parameters[parameter]);
-    }
-
-    // Do the actual call.
-    var url = 'http://tenon.io/api/';
-    var options = {
-      'headers': {
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      'method': 'POST',
-      'data': data
-    };
-    //$.post(url, options);
-
     // Format the report content.
     var report_id = 13456;
     var entry = {
