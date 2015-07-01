@@ -151,96 +151,33 @@ function tenon_trigger_page_report() {
   }
 
   // Build the query to the API.
-  $i = 0;
-  $data = '';
-  $api_parameters = array(
-    'key'             => $api_key,
-    'url'             => $tested_url,
-    'appId'           => variable_get('tenon_app_id', ''), // Remove if empty?
-    'projectID'       => variable_get('tenon_project_id', ''), // Remove if empty?
-    'certainty'       => variable_get('tenon_certainty', 0),
-    'importance'      => variable_get('tenon_importance', 0),
-    'level'           => variable_get('tenon_level', 'AAA'),
-    'priority'        => variable_get('tenon_priority', 0),
-    'ref'             => variable_get('tenon_ref', TRUE),
-    'store'           => variable_get('tenon_store', 0),
-    'uaString'        => variable_get('tenon_ua_string', ''),
-    'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
-    'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
-  );
-  foreach ($api_parameters as $parameter_name => $parameter_value) {
-    $separator = '';
-    if ($i++ != 0) {
-      $separator = '&';
-    }
-    $data .= $separator . $parameter_name . '=' . urlencode($parameter_value);
-  }
+  list($endpoint_url, $options) = tenon_query_build($tested_url, $api_key);
 
-  // Query the API.
-  $endpoint_url = variable_get('tenon_api_endpoint_page', TENON_IO_API_URL);
-  $options = array(
-    'headers' => array(
-      'Content-Type' => 'application/x-www-form-urlencoded',
-    ),
-    'method' => 'POST',
-    'data' => $data,
-  );
-
-  $output = tenon_query_api($endpoint_url, $options, $tested_url);
-  return $output;
-}
-
-/**
- * Query the API.
- *
- * @param $endpoint_url
- *   URL to send the request to.
- * @param $options
- *   Array of data describing the API to query. Those data are forwarded to
- *   drupal_http_request().
- * @param $tested_url
- *   String of the URL to test the API against.
- * @param $format
- *   String designating the format in which the output should be generated.
- *   Two values are allowed: full or summary.
- *
- * @return
- *   Returns the output of the query.
- */
-function tenon_query_api($endpoint_url, $options, $tested_url, $format = 'full') {
   $request = drupal_http_request($endpoint_url, $options);
 
   // Check if the request went through without any trouble.
   if ($request->code == 200) {
     // If we have a valid answer, decode the data.
     $data = drupal_json_decode($request->data);
-    switch ($format) {
-      case 'summary':
-        return tenon_query_display_page_results_summary($tested_url, $data);
-        break;
-      case 'full':
-      default:
-        return tenon_query_display_page_results_full($tested_url, $data);
-        break;
-    }
+    return tenon_query_display_page_results_full($tested_url, $data);
   }
   else {
     // Otherwise, explain the issue to the user and log it.
-    return tenon_query_handle_errors($request);
+    return tenon_query_handle_errors_html($request);
   }
 }
 
 /**
- * Analyzes the code returned by a query to the API.
+ * Format error messages for HTML.
  *
  * @param $request
- *   Object coming from the drupal_http_request() query.
+ *   Response object from Tenon.io API.
  *
  * @return
- *   Return output detailing the cause of the error.
+ *   String to display to the user.
  */
-function tenon_query_handle_errors($request) {
-  // Explain the issue to the user and log it.
+function tenon_query_handle_errors_html($request) {
+// Explain the issue to the user and log it.
   // If we don't have data in the request, it means that the server did not
   // answer and didn't provide its own metadata about the error.
   if (!isset($request->data)) {
@@ -276,12 +213,14 @@ function tenon_query_handle_errors($request) {
           $message = 'Please verify your API credentials. !settings_link.';
           $message_variables = array('!settings_link' => l(t('Verify the settings page'), 'admin/config/user-interface/tenon'));
         }
-        else if ($data['code'] == 'monthly_limit_reached') {
-          // Sample data to test?
-          $message = 'It looks like you have reached your monthly limit.';
-        }
         else {
-          $message = 'The connection to the API is unauthorized.';
+          if ($data['code'] == 'monthly_limit_reached') {
+            // Sample data to test?
+            $message = 'It looks like you have reached your monthly limit.';
+          }
+          else {
+            $message = 'The connection to the API is unauthorized.';
+          }
         }
         break;
       case 400:
@@ -348,11 +287,152 @@ function tenon_query_handle_errors($request) {
 
     // If we have a link to provide with more explanations of the cause of
     // the error, provide it to the user.
-    if (isset($data->moreInfo)) {
-      $output .= '<p>' . l(t('View the error details'), $data->moreInfo) . '</p>';
+    if (isset($data['moreInfo'])) {
+      $output .= '<p>' . l(t('View the error details'), $data['moreInfo']) . '</p>';
       return $output;
     }
     return $output;
+  }
+}
+
+/**
+ * Format error messages for AJAX.
+ *
+ * @param $request
+ *   Response object from Tenon.io API.
+ *
+ * @return
+ *   Returns the data array to send back to the AJAX request.
+ *   Expected keys of the array are:
+ *   - content: String of the error message.
+ *   - link: An html link to the details of the error.
+ *   - message_type:  A string of the message type.
+ */
+function tenon_query_handle_errors_ajax($request) {
+  // Explain the issue to the user and log it.
+  // If we don't have data in the request, it means that the server did not
+  // answer and didn't provide its own metadata about the error.
+  if (!isset($request->data)) {
+    // In this case, log a generic error message.
+    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
+    watchdog('tenon_api_error', 'Error !code: !error.', array(
+      '!code' => $request->code,
+      '!message' => $request->error
+    ));
+    return array(
+      'content' => $output,
+    );
+  }
+  else {
+    // Otherwise, decode the response from the API and analyze the error.
+    $message_type = 'error';
+    $message_variables = array();
+    $link = '';
+    $data = drupal_json_decode($request->data);
+
+    // Analyze the status code returned by the query.
+    switch ($data['status']) {
+      // Sample data to test?
+      case 500:
+        $message = 'An internal error occured, please try to submit your request again.';
+        break;
+      case 522:
+        // Sample data to test?
+        $message = 'The connection to the resource timed out.';
+        break;
+      case 401:
+        // Identity the cause of the unauthorized access.
+        if ($data['code'] == 'api_credentials_invalid') {
+          $message_type = 'warning';
+          $message = 'Please verify your API credentials.';
+          $link = l(t('Verify the settings page'), 'admin/config/user-interface/tenon');
+        }
+        else {
+          if ($data['code'] == 'monthly_limit_reached') {
+            // Sample data to test?
+            $message = 'It looks like you have reached your monthly limit.';
+          }
+          else {
+            $message = 'The connection to the API is unauthorized.';
+          }
+        }
+        break;
+      case 400:
+        $message = 'The request is malformed.';
+
+        // Identity the cause of the unauthorized access.
+        switch ($data['code']) {
+          case 'invalid_param':
+            $message_type = 'warning';
+            $message = '!invalid_param_message <br /> Please verify your settings.';
+            $link = l(t('Access the settings page'), 'admin/config/user-interface/tenon');
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'blank_url_or_src':
+            $message = '!invalid_param_message <br /> Please verify the tested URL.';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'bad_src':
+            $message = '!invalid_param_message <br /> Please verify the tested SRC.';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'abuse_detected':
+            $message = 'An abuse has been detected.';
+            break;
+          case 'required_param_missing':
+            $message = '!invalid_param_message';
+            $message_variables = array(
+              '!invalid_param_message' => $data['message']
+            );
+            break;
+          case 'doc_source_too_big':
+            // Sample data to test?
+            $message = 'The content submitted is too big to be analyzed.';
+            break;
+          case 'improper_content_type':
+            // Sample data to test?
+            $message = 'The submitted resource does not appear to be a valid content type.';
+            break;
+          case 'url_request_failed':
+            // Sample data to test?
+            $message = 'The attempt to test the requested URL failed.';
+            break;
+        }
+        break;
+      default:
+        $message = 'An error occured.';
+        break;
+    }
+    // Log the error.
+    watchdog('tenon_api_error', 'Error !code: !error.', array(
+      '!code' => $data['status'],
+      '!message' => $data['message']
+    ));
+
+    // @TODO: improve this user message.
+    // We need to call format_string() to keep the translation flexibility.
+    // We have a piece of the message that comes from the API so we need to have
+    // a variable for that.
+    $output = '<p>' . t('An error occured, we deeply apologize. <br /> !message', array('!message' => format_string($message, $message_variables))) . '</p>';
+
+    // If we have a link to provide with more explanations of the cause of
+    // the error, provide it to the user.
+    if (isset($data['moreInfo'])) {
+      $link = l(t('View the error details'), $data['moreInfo']);
+    }
+
+    // Format the data for the API.
+    return array(
+      'content' => $output,
+      'link' => $link,
+      'message_type' => $message_type,
+    );
   }
 }
 
@@ -369,10 +449,10 @@ function tenon_query_handle_errors($request) {
  */
 function tenon_query_display_page_results_full($tested_url, $data) {
   // Extract the results and format the response for the end user.
-  $issue_count    = $data['resultSummary']['issues']['totalIssues'];
-  $error_count    = $data['resultSummary']['issues']['totalErrors'];
-  $warning_count  = $data['resultSummary']['issues']['totalWarnings'];
-  $report_url     = 'https://tenon.io/report.php?id=' . $data['request']['reportID'];
+  $issue_count = $data['resultSummary']['issues']['totalIssues'];
+  $error_count = $data['resultSummary']['issues']['totalErrors'];
+  $warning_count = $data['resultSummary']['issues']['totalWarnings'];
+  $report_url = 'https://tenon.io/report.php?id=' . $data['request']['reportID'];
 
   $variables = array(
     'report_url' => l(t('View full results on Tenon.io'), $report_url),
@@ -403,9 +483,9 @@ function tenon_query_display_page_results_full($tested_url, $data) {
  */
 function tenon_query_display_page_results_summary($tested_url, $data) {
   // Extract the results and format the response for the end user.
-  $issue_count    = $data['resultSummary']['issues']['totalIssues'];
-  $error_count    = $data['resultSummary']['issues']['totalErrors'];
-  $warning_count  = $data['resultSummary']['issues']['totalWarnings'];
+  $issue_count = $data['resultSummary']['issues']['totalIssues'];
+  $error_count = $data['resultSummary']['issues']['totalErrors'];
+  $warning_count = $data['resultSummary']['issues']['totalWarnings'];
 
   $variables = array(
     'error_count' => $error_count,
@@ -422,16 +502,23 @@ function tenon_trigger_spider_report() {
   // @TODO once the API endpoint exists.
 }
 
-
-function tenon_trigger_ajax($tested_url) {
-  $tested_url = 'http://drupalfr.org';
-
+/**
+ * Format the page test's response of the API in JSON.
+ *
+ * @param $tested_url
+ *   Returns the data array to send back to the AJAX request.
+ *   Expected keys of the array are:
+ *   - content: String of the error message.
+ *   - link: An html link to the details of the error.
+ *   - message_type:  A string of the message type.
+ */
+function tenon_trigger_ajax($tested_url = 'http://drupalfr.org') {
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {
     // If not, be kind and invite him to do so.
     $content = array(
-      'content' => t('Wait! We are not able to generate a report while you do not provide us an API key!'),
+      'content' => '<p>' . t('Wait! We are not able to generate a report while you do not provide us an API key!') . '</p>',
       'link' => l(t('Fix it!'), 'admin/config/user-interface/tenon'),
     );
     watchdog('tenon_api', 'Page report: API request attempt without credentials.');
@@ -439,22 +526,44 @@ function tenon_trigger_ajax($tested_url) {
   else {
     // Build the query for the API.
     list($endpoint_url, $options) = tenon_query_build($tested_url, $api_key);
+    $request = drupal_http_request($endpoint_url, $options);
 
-    $output = tenon_query_api($endpoint_url, $options, $tested_url, 'summary');
-    $content = array(
-      'content' => $output,
-      'link' => l(t('Fix it!'), 'admin/config/user-interface/tenon'),
-    );
+    // Check if the request went through without any trouble.
+    if ($request->code == 200) {
+      // If we have a valid answer, decode the data.
+      $data = drupal_json_decode($request->data);
+      $output = tenon_query_display_page_results_summary($tested_url, $data);
+      $content = array(
+        'content' => $output,
+        'link' => l(t('View full report'), 'https://tenon.io/report.php?id=' . $data['request']['reportID']),
+      );
+    }
+    else {
+      // Otherwise, explain the issue to the user and log it.
+      $data = tenon_query_handle_errors_ajax($request);
+      $content = array(
+        'content' => $data['content'],
+        'link' => $data['link'],
+        'message_type' => $data['message_type'],
+      );
+    }
   }
-
   drupal_json_output($content);
   drupal_exit();
 }
 
 /**
+ * Helper to build the query call.
+ *
  * @param $tested_url
+ *   URL to test.
  * @param $api_key
- * @return array
+ *   API key.
+ *
+ * @return
+ *   Array of data composed of:
+ *   - Target URL against which the call is made.
+ *   - Options to send to the request.
  */
 function tenon_query_build($tested_url, $api_key) {
   $i = 0;

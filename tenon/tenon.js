@@ -82,8 +82,8 @@
           };
           //$.post(url, options);
           $.get('/tenon/ajax/url').done(function(data) {
-            console.log(data);
             $('.tenon-notifications .hopscotch-content .description').html(data.content);
+            $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
           });
 
 
