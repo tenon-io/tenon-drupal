@@ -453,6 +453,10 @@ function tenon_query_display_page_results_full($tested_url, $data) {
   $warning_count = $data['resultSummary']['issues']['totalWarnings'];
   $report_url = 'https://tenon.io/report.php?id=' . $data['request']['reportID'];
 
+  // Store the number of issues for a given URL.
+  $url_hash = md5($tested_url);
+  cache_set('tenon_' . $url_hash, $issue_count);
+
   $variables = array(
     'report_url' => l(t('View full results on Tenon.io'), $report_url),
     'error_count' => $error_count,
@@ -486,6 +490,10 @@ function tenon_query_display_page_results_summary($tested_url, $data) {
   $error_count = $data['resultSummary']['issues']['totalErrors'];
   $warning_count = $data['resultSummary']['issues']['totalWarnings'];
 
+  // Store the number of issues for the tested URL.
+  $url_hash = md5($tested_url);
+  cache_set('tenon_' . $url_hash, $issue_count);
+
   $variables = array(
     'error_count' => $error_count,
     'warning_count' => $warning_count,
@@ -510,7 +518,7 @@ function tenon_trigger_spider_report() {
  *  - link: An html link to the details of the error.
  *  - message_type:  A string of the message type.
  */
-function tenon_trigger_ajax() {
+function tenon_trigger_ajax_page_report() {
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {

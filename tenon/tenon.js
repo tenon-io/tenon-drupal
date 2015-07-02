@@ -5,19 +5,32 @@
   Drupal.behaviors.tenon_reports = {
     attach: function (context, settings) {
       // Setup.
-      var items = [];
       var menuLinkSel = 'a[data-tenon="page_report"]';
       if ($(menuLinkSel + '.tenon-notifications-processed').length) {
         return;
       }
       $(menuLinkSel).attr('href', '#').addClass('tenon-notifications-processed');
-      // Only continues if we have the hopscotch library defined.
+
+      // Only continue if we have the hopscotch library defined.
       if (typeof hopscotch == 'undefined') {
         return;
       }
-      // Sets up the DOM elements.
-      // @TODO: Plug the persistent reports.
-      $(menuLinkSel).append($("<span id='tenon-report-summary-count'>1 issue</span>"));
+      // If we have a count of issues reported for the current page, show it.
+      if (settings.tenon.issuesCount !== false) {
+        // Format the message based on its structure.
+        var msg = '';
+        var issues_class = '';
+        if (settings.tenon.issuesCount === 0) {
+          msg = Drupal.t('No issue');
+          issues_class = 'no-issue';
+        }
+        else {
+          msg = Drupal.formatPlural(settings.tenon.issuesCount, '1 issue', '@count issues');
+          issues_class = 'has-issue';
+        }
+        // Display the count of issues from the previous test.
+        $(menuLinkSel).append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + msg + '</span>'));
+      }
 
       // Adds our tour overlay behavior with desired effects.
       $('a[data-tenon="page_report"]').click(function (e) {
@@ -25,23 +38,20 @@
         Drupal.cp_toolbar.drawer_close();
 
         $('html, body').animate({scrollTop: 0}, '500', 'swing', function () {
-          var hopscotch_selector = '.hopscotch-bubble';
-          $(hopscotch_selector).addClass('animated');
-
-          var items = tenon_notification_generate_report(settings.tenon);
-
-          // Sets up the tour object with the loaded feed item steps.
+          // Sets up the tour object with appropriate content.
           var tour = {
             showPrevButton: true,
             scrollTopMargin: 100,
             id: "tenon-notifications",
-            steps: items
+            steps: [Drupal.tenon.buildItem(settings.tenon.moduleBasePath)]
           };
+          // Adjust the rendering to match our needs.
+          var hopscotch_selector = '.hopscotch-bubble';
+          $(hopscotch_selector).addClass('animated');
           hopscotch.startTour(tour);
 
           // Trigger the page report for the current URL.
-          // @TODO: plug the dynamic URL.
-          $.get('/tenon/ajax/page?url=' + encodeURI('http://drupalfr.org')).done(function(data) {
+          $.get('/tenon/ajax/page?url=' + encodeURI(settings.tenon.url)).done(function(data) {
             $('.tenon-notifications .hopscotch-content .description').html(data.content);
             $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
           });
@@ -53,55 +63,30 @@
     }
   };
 
-  /**
-   * Helper to query the API and generate the report content.
-   *
-   * @param settings
-   *   Drupal settings.
-   *
-   * @returns
-   *   Array of data for the Tour module.
-   */
-  function tenon_notification_generate_report(settings) {
-    // Format the report content.
-    var report_id = 13456;
-    var entry = {
-      content: '<p>Report generation in progress. <br /> <img src="' + settings.moduleBasePath + '/throbber.gif" /></p>',
-      link: 'https://tenon.io/report.php?id=' + report_id,
-      title: 'Your page accessibility report'
-    };
-    // Tour expects an array of items.
-    return [tenon_notification_build_item(entry)];
-  }
+  Drupal.tenon = Drupal.tenon || {
+    /**
+     * Format Tour content.
+     *
+     * @returns {{title: string, content: string, target: Element, placement: string, yOffset: number, xOffset: number}}
+     */
+    buildItem: function (module_path) {
+      // Prepare the output to display inside the tour's content region.
+      // Builds a default message to show the user that he has to wait.
+      var output = "<div class='feed_item'>";
+      output += '<span class="description"><p>' + Drupal.t("Report generation in progress.") + '<br />';
+      output += '<img src="' + module_path + '/throbber.gif" /></p></span>';
+      output += '<div class="tenon-notifications-readmore"></div>';
+      output += '</div>';
 
-  /**
-   * Format Tour content.
-   *
-   * @param entry
-   *   Object with the following keys:
-   *   - title: Title of the tour step.
-   *   - content: Content to display for this step.
-   *   - link: Link to read more details about the step.
-   *
-   * @returns {{title: string, content: string, target: Element, placement: string, yOffset: number, xOffset: number}}
-   */
-  function tenon_notification_build_item(entry) {
-    // Prepare the output to display inside the tour's content region.
-    var output = "<div class='feed_item'>";
-
-    // Builds the remainder of the content, with a "Read more" link.
-    output += "<span class='description'>" + entry.content + "</span>";
-    output += '<div class="tenon-notifications-readmore"></div></div>';
-
-    // Returns the item to be added to the tour's (array) `items` property .
-    var item = {
-      title: entry.title,
-      content: output,
-      target: document.querySelector('.tenon-link'),
-      placement: "bottom",
-      yOffset: -3,
-      xOffset: -10,
-    };
-    return item;
-  }
+      // Returns the item to be added to the tour's (array) `items` property.
+      return {
+        title: Drupal.t('Your page accessibility report'),
+        content: output,
+        target: document.querySelector('.tenon-link'),
+        placement: "bottom",
+        yOffset: -3,
+        xOffset: -10,
+      };
+    }
+  };
 })(jQuery);

@@ -4,7 +4,6 @@
 }
 
 #toolbar #tenon-report-summary-count {
-  background-color: darkorange;
   color: #fff;
   display: inline-block;
   font-size: 12px;
@@ -16,6 +15,14 @@
   text-align: center;
   vertical-align: baseline;
   white-space: nowrap;
+}
+
+#toolbar #tenon-report-summary-count.no-issue {
+  background-color: yellowgreen;
+}
+
+#toolbar #tenon-report-summary-count.has-issue {
+  background-color: darkorange;
 }
 
 div.hopscotch-bubble.tenon-notifications .hopscotch-bubble-content {

@@ -43,7 +43,7 @@ function tenon_menu() {
     'tenon/ajax/page' => array(
       'title' => 'Ajax test',
       'delivery callback' => 'ajax_deliver',
-      'page callback' => 'tenon_trigger_ajax',
+      'page callback' => 'tenon_trigger_ajax_page_report',
       'access arguments' => array('tenon trigger page report'),
       'file' => 'tenon.admin.inc',
     ),
@@ -60,12 +60,20 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
 
   // Display the toolbar menu if the user can access a page.
   if ($l_page['access'] || $l_spider['access']) {
+    // Extract the potential existing report count from cache.
+    $tested_url = url(current_path(), array('absolute' => TRUE));
+    $url_hash = md5($tested_url);
+    $issues_count_cache = cache_get('tenon_' . $url_hash);
+    if ($issues_count_cache) {
+      $issues_count_cache = $issues_count_cache->data;
+    }
+
     // Attach a JS & CSS file.
     $settings = array(
       'key'             => variable_get('tenon_api_key', NULL),
-      'url'             => 'http://drupalfr.org',
-      'appId'           => variable_get('tenon_app_id', ''), // Remove if empty?
-      'projectID'       => variable_get('tenon_project_id', ''), // Remove if empty?
+      'url'             => $tested_url,
+      'appId'           => variable_get('tenon_app_id', ''),
+      'projectID'       => variable_get('tenon_project_id', ''),
       'certainty'       => variable_get('tenon_certainty', 0),
       'importance'      => variable_get('tenon_importance', 0),
       'level'           => variable_get('tenon_level', 'AAA'),
@@ -76,6 +84,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
       'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
       'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
       'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
+      'issuesCount'     => $issues_count_cache,
     );
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
     $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
