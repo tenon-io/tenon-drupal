@@ -81,11 +81,10 @@
             'data': data
           };
           //$.post(url, options);
-          $.get('/tenon/ajax/url').done(function(data) {
+          $.get('/tenon/ajax/page?url=' + encodeURI('http://drupalfr.org')).done(function(data) {
             $('.tenon-notifications .hopscotch-content .description').html(data.content);
             $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
           });
-
 
           // Removes animation for each step and let us to target just this tour in CSS rules.
           $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
@@ -132,7 +131,7 @@
 
     // Builds the remainder of the content, with a "Read more" link.
     output += "<span class='description'>" + entry.content + "</span>";
-    output += '<div class="tenon-notifications-readmore"><a target="_blank" href="' + entry.link + '">Read more &raquo;</a></div></div>';
+    output += '<div class="tenon-notifications-readmore"></div></div>';
 
     // Returns the item to be added to the tour's (array) `items` property .
     var item = {

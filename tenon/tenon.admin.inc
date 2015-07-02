@@ -505,14 +505,13 @@ function tenon_trigger_spider_report() {
 /**
  * Format the page test's response of the API in JSON.
  *
- * @param $tested_url
- *   Returns the data array to send back to the AJAX request.
- *   Expected keys of the array are:
- *   - content: String of the error message.
- *   - link: An html link to the details of the error.
- *   - message_type:  A string of the message type.
+ * Returns the data array to send back to the AJAX request.
+ * Expected keys of the array are:
+ *  - content: String of the error message.
+ *  - link: An html link to the details of the error.
+ *  - message_type:  A string of the message type.
  */
-function tenon_trigger_ajax($tested_url = 'http://drupalfr.org') {
+function tenon_trigger_ajax() {
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {
@@ -523,7 +522,16 @@ function tenon_trigger_ajax($tested_url = 'http://drupalfr.org') {
     );
     watchdog('tenon_api', 'Page report: API request attempt without credentials.');
   }
+  // Verify that we have an URL to test.
+  else if (empty($_GET['url'])) {
+    $content = array(
+      'content' => '<p>' . t('The page URL to test is not defined.') . '</p>',
+    );
+  }
   else {
+    // Get the URL to test.
+    $tested_url = $_GET['url'];
+
     // Build the query for the API.
     list($endpoint_url, $options) = tenon_query_build($tested_url, $api_key);
     $request = drupal_http_request($endpoint_url, $options);

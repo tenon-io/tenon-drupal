@@ -40,11 +40,10 @@ function tenon_menu() {
       'access callback' => FALSE,
       'file' => 'tenon.admin.inc',
     ),
-    'tenon/ajax/%' => array(
+    'tenon/ajax/page' => array(
       'title' => 'Ajax test',
       'delivery callback' => 'ajax_deliver',
       'page callback' => 'tenon_trigger_ajax',
-      'page arguments' => array(2),
       'access arguments' => array('tenon trigger page report'),
       'file' => 'tenon.admin.inc',
     ),
