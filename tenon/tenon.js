@@ -39,48 +39,7 @@
           };
           hopscotch.startTour(tour);
 
-          // Temporary solution to simulate a call to the API.
-          //setTimeout(function () {
-          //  $('.tenon-notifications .hopscotch-content .description').html('<p>OK</p>');
-          //}, 2000);
-
-          // Prepare data for the API request.
-          var i = 0;
-          var data = '';
-          var api_parameters = {
-            'key': settings.tenon.key,
-            'url': settings.tenon.url,
-            'appId': settings.tenon.appId,
-            'projectID': settings.tenon.projectID,
-            'certainty': settings.tenon.certainty,
-            'importance': settings.tenon.importance,
-            'level': settings.tenon.level,
-            'priority': settings.tenon.priority,
-            'ref': settings.tenon.ref,
-            'store': settings.tenon.store,
-            'uaString': settings.tenon.uaString,
-            'viewPortHeight': settings.tenon.viewPortHeight,
-            'viewPortWidth': settings.tenon.viewPortWidth
-          };
-
-          for (var parameter in api_parameters ) {
-            var separator = '';
-            if (i++ != 0) {
-              separator = '&';
-            }
-            data += separator + parameter + '=' + encodeURIComponent(api_parameters[parameter]);
-          }
-
-          // Do the actual call.
-          var url = 'http://tenon.io/api/';
-          var options = {
-            'headers': {
-              'Content-Type': 'application/x-www-form-urlencoded'
-            },
-            'method': 'POST',
-            'data': data
-          };
-          //$.post(url, options);
+          // Trigger the page report for the current URL.
           $.get('/tenon/ajax/page?url=' + encodeURI('http://drupalfr.org')).done(function(data) {
             $('.tenon-notifications .hopscotch-content .description').html(data.content);
             $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
