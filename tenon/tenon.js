@@ -37,28 +37,26 @@
         // Close the drawer when we generate the report.
         Drupal.cp_toolbar.drawer_close();
 
-        $('html, body').animate({scrollTop: 0}, '500', 'swing', function () {
-          // Sets up the tour object with appropriate content.
-          var tour = {
-            showPrevButton: true,
-            scrollTopMargin: 100,
-            id: "tenon-notifications",
-            steps: [Drupal.tenon.buildItem(settings.tenon.moduleBasePath)]
-          };
-          // Adjust the rendering to match our needs.
-          var hopscotch_selector = '.hopscotch-bubble';
-          $(hopscotch_selector).addClass('animated');
-          hopscotch.startTour(tour);
+        // Sets up the tour object with appropriate content.
+        var tour = {
+          showPrevButton: true,
+          scrollTopMargin: 100,
+          id: "tenon-notifications",
+          steps: [Drupal.tenon.buildItem(settings.tenon.moduleBasePath)]
+        };
+        // Adjust the rendering to match our needs.
+        var hopscotch_selector = '.hopscotch-bubble';
+        $(hopscotch_selector).addClass('animated');
+        hopscotch.startTour(tour);
 
-          // Trigger the page report for the current URL.
-          $.get('/tenon/ajax/page?url=' + encodeURI(settings.tenon.url)).done(function(data) {
-            $('.tenon-notifications .hopscotch-content .description').html(data.content);
-            $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
-          });
-
-          // Removes animation for each step and let us to target just this tour in CSS rules.
-          $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
+        // Trigger the page report for the current URL.
+        $.get('/tenon/ajax/page?url=' + encodeURI(settings.tenon.url)).done(function(data) {
+          $('.tenon-notifications .hopscotch-content .description').html(data.content);
+          $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
         });
+
+        // Removes animation for each step and let us to target just this tour in CSS rules.
+        $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
       });
     }
   };
