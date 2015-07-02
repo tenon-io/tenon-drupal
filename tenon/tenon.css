@@ -22,7 +22,7 @@
 }
 
 #toolbar #tenon-report-summary-count.has-issue {
-  background-color: darkorange;
+  background-color: red;
 }
 
 div.hopscotch-bubble.tenon-notifications .hopscotch-bubble-content {

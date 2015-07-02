@@ -9,7 +9,7 @@
       if ($(menuLinkSel + '.tenon-notifications-processed').length) {
         return;
       }
-      $(menuLinkSel).attr('href', '#').addClass('tenon-notifications-processed');
+      $(menuLinkSel).addClass('tenon-notifications-processed');
 
       // Only continue if we have the hopscotch library defined.
       if (typeof hopscotch == 'undefined') {
@@ -18,22 +18,22 @@
       // If we have a count of issues reported for the current page, show it.
       if (settings.tenon.issuesCount !== false) {
         // Format the message based on its structure.
-        var msg = '';
         var issues_class = '';
         if (settings.tenon.issuesCount === 0) {
-          msg = Drupal.t('No issue');
           issues_class = 'no-issue';
         }
         else {
-          msg = Drupal.formatPlural(settings.tenon.issuesCount, '1 issue', '@count issues');
           issues_class = 'has-issue';
         }
         // Display the count of issues from the previous test.
-        $(menuLinkSel).append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + msg + '</span>'));
+        $('.tenon-link').append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + settings.tenon.issuesCount + '</span>'));
       }
 
       // Adds our tour overlay behavior with desired effects.
       $('a[data-tenon="page_report"]').click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+
         // Close the drawer when we generate the report.
         Drupal.cp_toolbar.drawer_close();
 
