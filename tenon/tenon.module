@@ -89,6 +89,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
     $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
     $toolbar['#attached']['js'][] = array('type' => 'setting', 'data' => array('tenon' => $settings));
+    $toolbar['#attached']['library'][] = array('os_tour', 'hopscotch');
 
     $toolbar['toolbar_left']['toolbar_menu']['#links']['tenon'] = array(
       'title' => '<span class="tenon-link">' . t('Accessibility Check') . '</span>',
