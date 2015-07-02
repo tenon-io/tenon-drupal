@@ -52,7 +52,7 @@
         // Trigger the page report for the current URL.
         // Format the URL according to the fact that the
         // URL rewriting is on or off.
-        if (settings.tenon.cleanUrl) {
+        if (settings.tenon.cleanUrl == true) {
           var url = Drupal.settings.basePath + 'tenon/ajax/page?url=' + encodeURI(settings.tenon.url);
         }
         else {

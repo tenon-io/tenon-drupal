@@ -185,7 +185,7 @@ function tenon_query_handle_errors_html($request) {
     drupal_set_message(t('The connection to the ressource timed out.'), 'error');
     watchdog('tenon_api_error', 'Error !code: !error.', array(
       '!code' => $request->code,
-      '!message' => $request->error
+      '!error' => $request->error
     ));
     return $output;
   }
@@ -313,13 +313,15 @@ function tenon_query_handle_errors_ajax($request) {
   // answer and didn't provide its own metadata about the error.
   if (!isset($request->data)) {
     // In this case, log a generic error message.
-    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
+    $output = '<p>' . t('An error occured, we deeply apologize, the request timed out.') . '</p>';
     watchdog('tenon_api_error', 'Error !code: !error.', array(
       '!code' => $request->code,
-      '!message' => $request->error
+      '!error' => $request->error
     ));
     return array(
       'content' => $output,
+      'link' => '',
+      'message_type' => '',
     );
   }
   else {
