@@ -50,7 +50,15 @@
         hopscotch.startTour(tour);
 
         // Trigger the page report for the current URL.
-        $.get('/tenon/ajax/page?url=' + encodeURI(settings.tenon.url)).done(function(data) {
+        // Format the URL according to the fact that the
+        // URL rewriting is on or off.
+        if (settings.tenon.cleanUrl) {
+          var url = Drupal.settings.basePath + 'tenon/ajax/page?url=' + encodeURI(settings.tenon.url);
+        }
+        else {
+          var url = Drupal.settings.basePath + '?q=tenon/ajax/page&url=' + encodeURI(settings.tenon.url);
+        }
+        $.get(url).done(function(data) {
           $('.tenon-notifications .hopscotch-content .description').html(data.content);
           $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);
         });

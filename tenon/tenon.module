@@ -85,6 +85,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
       'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
       'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
       'issuesCount'     => $issues_count_cache,
+      'cleanUrl'        => variable_get('clean_url', FALSE),
     );
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
     $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
