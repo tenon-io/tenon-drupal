@@ -17,7 +17,7 @@
       }
       // Sets up the DOM elements.
       // @TODO: Plug the persistent reports.
-      $(menuLinkSel).append($("<span id='tenon-report-summary-count'>1</span>"));
+      $(menuLinkSel).append($("<span id='tenon-report-summary-count'>1 issue</span>"));
 
       // Adds our tour overlay behavior with desired effects.
       $('a[data-tenon="page_report"]').click(function (e) {
@@ -40,6 +40,7 @@
           hopscotch.startTour(tour);
 
           // Trigger the page report for the current URL.
+          // @TODO: plug the dynamic URL.
           $.get('/tenon/ajax/page?url=' + encodeURI('http://drupalfr.org')).done(function(data) {
             $('.tenon-notifications .hopscotch-content .description').html(data.content);
             $('.tenon-notifications .hopscotch-content .tenon-notifications-readmore').html(data.link);

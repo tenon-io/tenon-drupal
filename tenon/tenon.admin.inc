@@ -139,7 +139,6 @@ function tenon_trigger_page_report() {
   if (!empty($_GET['url'])) {
     $tested_url = $_GET['url'];
   }
-  $tested_url = 'http://drupalfr.org';
   // First of all, check if the user provided an API key.
   $api_key = variable_get('tenon_api_key', NULL);
   if (empty($api_key)) {
