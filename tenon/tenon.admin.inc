@@ -2,6 +2,10 @@
 
 /**
  * Admin settings form.
+ * @param $form
+ * @param $form_state
+ *
+ * @return mixed
  */
 function tenon_admin_settings_form($form, &$form_state) {
   $form['api_settings'] = array(
@@ -122,6 +126,7 @@ function tenon_admin_settings_form($form, &$form_state) {
 
 /**
  * Validation callback to check that a value is a positive numeric value.
+ * @param $element
  */
 function tenon_validate_numeric_value($element) {
   $value = $element['#value'];
@@ -133,6 +138,7 @@ function tenon_validate_numeric_value($element) {
 
 /**
  * Trigger a page report.
+ * @return string|void
  */
 function tenon_trigger_page_report() {
   $tested_url = url(current_path(), array('absolute' => TRUE));
@@ -181,8 +187,8 @@ function tenon_query_handle_errors_html($request) {
   // answer and didn't provide its own metadata about the error.
   if (!isset($request->data)) {
     // In this case, log a generic error message.
-    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
-    drupal_set_message(t('The connection to the ressource timed out.'), 'error');
+    $output = '<p>' . t('An error occurred, We deeply apologize.') . '</p>';
+    drupal_set_message(t('The connection to the resource timed out.'), 'error');
     watchdog('tenon_api_error', 'Error !code: !error.', array(
       '!code' => $request->code,
       '!error' => $request->error
@@ -199,7 +205,7 @@ function tenon_query_handle_errors_html($request) {
     switch ($data['status']) {
       // Sample data to test?
       case 500:
-        $message = 'An internal error occured, please try to submit your request again.';
+        $message = 'An internal error occurred, Please try to submit your request again.';
         break;
       case 522:
         // Sample data to test?
@@ -282,7 +288,7 @@ function tenon_query_handle_errors_html($request) {
     ));
 
     // @TODO: improve this user message.
-    $output = '<p>' . t('An error occured, we deeply apologize.') . '</p>';
+    $output = '<p>' . t('An error occurred, we deeply apologize.') . '</p>';
 
     // If we have a link to provide with more explanations of the cause of
     // the error, provide it to the user.
@@ -335,7 +341,7 @@ function tenon_query_handle_errors_ajax($request) {
     switch ($data['status']) {
       // Sample data to test?
       case 500:
-        $message = 'An internal error occured, please try to submit your request again.';
+        $message = 'An internal error occurred, please try to submit your request again.';
         break;
       case 522:
         // Sample data to test?
@@ -453,7 +459,7 @@ function tenon_query_display_page_results_full($tested_url, $data) {
   $issue_count = $data['resultSummary']['issues']['totalIssues'];
   $error_count = $data['resultSummary']['issues']['totalErrors'];
   $warning_count = $data['resultSummary']['issues']['totalWarnings'];
-  $report_url = 'https://tenon.io/report.php?id=' . $data['request']['reportID'];
+  $report_url = 'https://tenon.io/history.php?responseID=' . $data['request']['responseID'];
 
   // Store the number of issues for a given URL.
   $url_hash = md5($tested_url);

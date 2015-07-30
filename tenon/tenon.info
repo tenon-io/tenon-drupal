@@ -1,5 +1,5 @@
 name = Tenon.io
-description = Connect your site to Tenon.io.
+description = Test your site accessibility with Tenon.io.
 package = Other
 core = 7.x
 configure = admin/config/user-interface/tenon
