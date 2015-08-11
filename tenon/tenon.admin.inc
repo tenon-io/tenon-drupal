@@ -558,7 +558,7 @@ function tenon_trigger_ajax_page_report() {
       $output = tenon_query_display_page_results_summary($tested_url, $data);
       $content = array(
         'content' => $output,
-        'link' => l(t('View full report'), 'https://tenon.io/report.php?id=' . $data['request']['reportID']),
+        'link' => l(t('View full report'), 'https://tenon.io/history.php?responseID=' . $data['request']['responseID']),
       );
     }
     else {
