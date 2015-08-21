@@ -78,11 +78,11 @@ function tenon_admin_settings_form($form, &$form_state) {
     '#default_value' => variable_get('tenon_ref_information', TRUE),
   );
   $form['api_advanced_settings']['tenon_store_information'] = array(
-    '#type' => 'radios',
+    '#type' => 'hidden',
     '#title' => t('Store information'),
     '#options' => array(0 => t('No'), 1 => t('Yes')),
     '#description' => t('Store your test results on Tenon to come back later and view your results in our Web-based system.'),
-    '#default_value' => variable_get('tenon_store_information', 0),
+    '#default_value' => variable_get('tenon_store_information', 1),
   );
   $form['api_advanced_settings']['tenon_project_id'] = array(
     '#type' => 'textfield',

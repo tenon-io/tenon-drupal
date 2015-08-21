@@ -29,3 +29,10 @@ function tenon_uninstall() {
   variable_del('tenon_viewport_width');
   variable_del('tenon_viewport_height');
 }
+
+/**
+ * Change the default status of the storage flag.
+ */
+function tenon_update_7001() {
+  variable_set('tenon_store_information', 1);
+}
