@@ -66,6 +66,11 @@
         // Removes animation for each step and let us to target just this tour in CSS rules.
         $(hopscotch_selector).removeClass('animated').addClass('tenon-notifications');
       });
+      // Prevent to trigger unwanted reports on the parent menu link.
+      $('a[data-drawer="tenon-drawer"]').click(function (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      });
     }
   };
 
