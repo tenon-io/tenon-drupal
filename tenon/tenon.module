@@ -201,3 +201,90 @@ function tenon_admin_menu_output_alter(&$content) {
     );
   }
 }
+
+/**
+ * Implements hook_page_alter().
+ */
+function tenon_page_alter(&$page) {
+  if (module_exists('toolbar') && libraries_load('hopscotch')) {
+    // Extract the potential existing report count from cache.
+    $tested_url = url(current_path(), array('absolute' => TRUE));
+    $url_hash = md5($tested_url);
+    $issues_count_cache = cache_get('tenon_' . $url_hash);
+    if ($issues_count_cache) {
+      $issues_count_cache = $issues_count_cache->data;
+    }
+
+    // Attach a JS & CSS file.
+    $settings = array(
+      'key'             => variable_get('tenon_api_key', NULL),
+      'url'             => $tested_url,
+      'appId'           => variable_get('tenon_app_id', ''),
+      'projectID'       => variable_get('tenon_project_id', ''),
+      'certainty'       => variable_get('tenon_certainty', 0),
+      'importance'      => variable_get('tenon_importance', 0),
+      'level'           => variable_get('tenon_level', 'AAA'),
+      'priority'        => variable_get('tenon_priority', 0),
+      'ref'             => variable_get('tenon_ref_information', TRUE),
+      'store'           => variable_get('tenon_store_information', 1),
+      'uaString'        => variable_get('tenon_ua_string', ''),
+      'viewPortHeight'  => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
+      'viewPortWidth'   => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
+      'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
+      'issuesCount'     => $issues_count_cache,
+      'cleanUrl'        => variable_get('clean_url', FALSE),
+    );
+    $page['page_bottom']['#attached']['js'][] = array('type' => 'setting', 'data' => array('tenon' => $settings));
+    $page['page_bottom']['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
+    $page['page_bottom']['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
+  }
+}
+
+/**
+ * Implements hook_libraries_info().
+ */
+function tenon_libraries_info() {
+  return array(
+    'hopscotch' => array(
+      'name' => t('Hopscotch'),
+      'vendor url' => 'http://linkedin.github.io/hopscotch/',
+      'download url' => 'https://github.com/linkedin/hopscotch',
+      'version callback' => 'tenon_get_hopscotch_version',
+      'files' => array(
+        'js' => array('js/hopscotch-0.1.2.min.js'),
+        'css' => array('css/hopscotch-0.1.2.min.css'),
+      ),
+      'variants' => array(
+        'minified' => array(
+          'files' => array(
+            'js' => array(
+              'js/hopscotch-0.1.2.min.js',
+            ),
+            'css' => array(
+              'css/hopscotch-0.1.2.min.css',
+            ),
+          ),
+        ),
+        'source' => array(
+          'files' => array(
+            'js' => array(
+              'js/hopscotch-0.1.2.js',
+            ),
+            'css' => array(
+              'css/hopscotch-0.1.2.css',
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Helper to get the library version.
+ */
+function tenon_get_hopscotch_version($library) {
+  // Since the library doesn't store its version, we need to explicitly
+  // return its value.
+  return '0.1.2';
+}
