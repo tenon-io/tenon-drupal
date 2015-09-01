@@ -86,6 +86,7 @@ function tenon_cp_toolbar_pre_render_alter(&$toolbar) {
       'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
       'issuesCount'     => $issues_count_cache,
       'cleanUrl'        => variable_get('clean_url', FALSE),
+      'profile'         => variable_get('install_profile', ''),
     );
     $toolbar['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';
     $toolbar['#attached']['js'][] = drupal_get_path('module', 'tenon') . '/tenon.js';
@@ -233,6 +234,7 @@ function tenon_page_alter(&$page) {
       'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon'),
       'issuesCount'     => $issues_count_cache,
       'cleanUrl'        => variable_get('clean_url', FALSE),
+      'profile'         => variable_get('install_profile', ''),
     );
     $page['page_bottom']['#attached']['js'][] = array('type' => 'setting', 'data' => array('tenon' => $settings));
     $page['page_bottom']['#attached']['css'][] = drupal_get_path('module', 'tenon') . '/tenon.css';

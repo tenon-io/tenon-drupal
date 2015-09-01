@@ -4,6 +4,10 @@
 (function ($) {
   Drupal.behaviors.tenon_reports = {
     attach: function (context, settings) {
+      // Don't run this behavior if the installation profile isn't Open Scholar.
+      if (settings.tenon.profile != 'openscholar') {
+        return;
+      }
       // Setup.
       var menuLinkSel = 'a[data-tenon="page_report"]';
       if ($(menuLinkSel + '.tenon-notifications-processed').length) {
@@ -12,7 +16,7 @@
       $(menuLinkSel).addClass('tenon-notifications-processed');
 
       // Only continue if we have the hopscotch library defined.
-      if (typeof hopscotch == 'undefined') {
+      if (typeof hopscotch == 'undefined' || $('a[data-tenon="page_report"]').length == 0) {
         return;
       }
       // Display the potential existing page results of a previous test.
@@ -43,14 +47,18 @@
 
   Drupal.behaviors.tenon_controller = {
     attach: function (context, settings) {
+      // Don't run this behavior if the installation profile is Open Scholar.
+      // Use it for the "normal" sites.
+      if (settings.tenon.profile == 'openscholar') {
+        return;
+      }
       // Setup.
       $('<li><a tenon-data="parent-link" href="#"><span class="tenon-link">' + Drupal.t('Accessibility Check') + '</span></a></li>').insertAfter('#toolbar-user li.first');
 
       // Only continue if we have the hopscotch library defined.
-      if (typeof hopscotch == 'undefined') {
+      if (typeof hopscotch == 'undefined' || $('a[tenon-data="parent-link"]').length == 0) {
         return;
       }
-
       // Display the potential existing page results of a previous test.
       Drupal.tenon.generateTestReport(settings, '.tenon-link');
 
@@ -93,7 +101,13 @@
             issues_class = 'has-issue';
           }
           // Display the count of issues from the previous test.
-          $(selector).append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + settings.tenon.issuesCount + '</span>'));
+          var summary_count_placeholder = $('#tenon-report-summary-count');
+          if (summary_count_placeholder.length == 0 ) {
+            $(selector).append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + settings.tenon.issuesCount + '</span>'));
+          }
+          else {
+            $(summary_count_placeholder).html(settings.tenon.issuesCount).removeClass('no-issue').removeClass('has-issue').addClass(issues_class);
+          }
         }
       },
 
