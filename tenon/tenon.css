@@ -1,8 +1,10 @@
+#admin-menu .tenon-link,
 #toolbar .tenon-link {
   background: transparent url('logo_tenon.png') no-repeat top left;
   padding-left: 22px;
 }
 
+#admin-menu #tenon-report-summary-count,
 #toolbar #tenon-report-summary-count {
   color: #fff;
   display: inline-block;
@@ -17,10 +19,12 @@
   white-space: nowrap;
 }
 
+#admin-menu #tenon-report-summary-count.no-issue,
 #toolbar #tenon-report-summary-count.no-issue {
   background-color: yellowgreen;
 }
 
+#admin-menu #tenon-report-summary-count.has-issue,
 #toolbar #tenon-report-summary-count.has-issue {
   background-color: red;
 }

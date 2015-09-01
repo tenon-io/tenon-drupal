@@ -207,7 +207,7 @@ function tenon_admin_menu_output_alter(&$content) {
  * Implements hook_page_alter().
  */
 function tenon_page_alter(&$page) {
-  if (module_exists('toolbar') && libraries_load('hopscotch')) {
+  if ((module_exists('toolbar') || module_exists('admin_menu')) && libraries_load('hopscotch')) {
     // Extract the potential existing report count from cache.
     $tested_url = url(current_path(), array('absolute' => TRUE));
     $url_hash = md5($tested_url);

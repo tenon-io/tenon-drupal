@@ -45,7 +45,7 @@
     }
   };
 
-  Drupal.behaviors.tenon_controller = {
+  Drupal.behaviors.tenon_toolbar = {
     attach: function (context, settings) {
       // Don't run this behavior if the installation profile is Open Scholar.
       // Use it for the "normal" sites.
@@ -75,6 +75,42 @@
         // Build the report content for the tested page.
         Drupal.tenon.settlePageReportGeneration(settings);
       });
+    }
+  };
+
+  Drupal.behaviors.tenon_admin_menu = {
+    attach: function (context, settings) {
+      // Don't run this behavior if the installation profile is Open Scholar.
+      // Use it for the "normal" sites if the admin-menu module is enabled.
+      if (settings.tenon.profile == 'openscholar' || $('body').hasClass('admin-menu') == false) {
+        return;
+      }
+      // Setup with a timeout delay to be compatible with admin menu that adds
+      // the markup in JS.
+      // Better way to do this are welcomed.
+      setTimeout(function() {
+        $('<li class="admin-menu-action"><a tenon-data="parent-link" href="#"><span class="tenon-link">' + Drupal.t('Accessibility Check') + '</span></a></li>').insertAfter('#admin-menu-account li:eq(0)');
+        // Only continue if we have the hopscotch library defined.
+        if (typeof hopscotch == 'undefined' || $('a[tenon-data="parent-link"]').length == 0) {
+          return;
+        }
+        // Display the potential existing page results of a previous test.
+        Drupal.tenon.generateTestReport(settings, '.tenon-link');
+
+        // Adds our tour overlay behavior with desired effects.
+        $('a[tenon-data="parent-link"]').click(function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+
+          // Sets up the tour object with appropriate content.
+          Drupal.tenon.settings.placement = 'bottom';
+          Drupal.tenon.settings.arrowOffset = 'center';
+          Drupal.tenon.settings.xOffset = -100;
+
+          // Build the report content for the tested page.
+          Drupal.tenon.settlePageReportGeneration(settings);
+        });
+      }, 200);
     }
   };
 
