@@ -36,3 +36,10 @@ function tenon_uninstall() {
 function tenon_update_7001() {
   variable_set('tenon_store_information', 1);
 }
+
+/**
+ * Clean the unused variable forced to be a flag set to TRUE.
+ */
+function tenon_update_7002() {
+  variable_del('tenon_store_information');
+}

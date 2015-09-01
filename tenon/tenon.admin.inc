@@ -601,7 +601,7 @@ function tenon_query_build($tested_url, $api_key) {
     'level' => variable_get('tenon_level', 'AAA'),
     'priority' => variable_get('tenon_priority', 0),
     'ref' => variable_get('tenon_ref', TRUE),
-    'store' => variable_get('tenon_store', 0),
+    'store' => TRUE,
     'uaString' => variable_get('tenon_ua_string', ''),
     'viewPortHeight' => variable_get('tenon_viewport_height', TENON_VIEWPORT_DEFAULT_HEIGHT),
     'viewPortWidth' => variable_get('tenon_viewport_width', TENON_VIEWPORT_DEFAULT_WIDTH),
