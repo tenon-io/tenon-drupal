@@ -16,7 +16,7 @@
         return;
       }
       // Display the potential existing page results of a previous test.
-      Drupal.tenon.generateTestReport(settings);
+      Drupal.tenon.generateTestReport(settings, '.tenon-link');
 
       // Adds our tour overlay behavior with desired effects.
       $('a[data-tenon="page_report"]').click(function (e) {
@@ -44,7 +44,7 @@
   Drupal.behaviors.tenon_controller = {
     attach: function (context, settings) {
       // Setup.
-      $('<li><a data-drawer="tenon-drawer" href="#"><span class="tenon-link">' + Drupal.t('Accessibility Check') + '</span></a></li>').insertAfter('#toolbar-user li.first');
+      $('<li><a tenon-data="parent-link" href="#"><span class="tenon-link">' + Drupal.t('Accessibility Check') + '</span></a></li>').insertAfter('#toolbar-user li.first');
 
       // Only continue if we have the hopscotch library defined.
       if (typeof hopscotch == 'undefined') {
@@ -52,10 +52,10 @@
       }
 
       // Display the potential existing page results of a previous test.
-      Drupal.tenon.generateTestReport(settings);
+      Drupal.tenon.generateTestReport(settings, '.tenon-link');
 
       // Adds our tour overlay behavior with desired effects.
-      $('a[data-drawer="tenon-drawer"]').click(function (e) {
+      $('a[tenon-data="parent-link"]').click(function (e) {
         e.preventDefault();
         e.stopPropagation();
 
@@ -81,7 +81,7 @@
       },
 
       // Displays the results of a previous test.
-      generateTestReport: function (settings) {
+      generateTestReport: function (settings, selector) {
         // If we have a count of issues reported for the current page, show it.
         if (settings.tenon.issuesCount !== false && settings.tenon.issuesCount !== null) {
           // Format the message based on its structure.
@@ -93,7 +93,7 @@
             issues_class = 'has-issue';
           }
           // Display the count of issues from the previous test.
-          $('.tenon-link').append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + settings.tenon.issuesCount + '</span>'));
+          $(selector).append($('<span id="tenon-report-summary-count" class="' + issues_class + '">' + settings.tenon.issuesCount + '</span>'));
         }
       },
 

@@ -1,4 +1,4 @@
-#toolbar a[data-drawer="tenon-drawer"] .tenon-link {
+#toolbar .tenon-link {
   background: transparent url('logo_tenon.png') no-repeat top left;
   padding-left: 22px;
 }
