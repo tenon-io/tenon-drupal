@@ -1,4 +1,6 @@
-#Tenon Open Scholar Module
+#Tenon Drupal Module
+
+Note: This module supports both Drupal and Open Scholar
 
 ## Get a Tenon.io account before continuing
 If you do not already have an account on Tenon.io, you need one to use this. Head over to [https://tenon.io/register.php](https://tenon.io/register.php). 
