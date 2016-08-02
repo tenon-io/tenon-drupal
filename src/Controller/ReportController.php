@@ -68,7 +68,7 @@ class ReportController extends ControllerBase {
   public function page(Request $request) {
     $tested_url = $request->query->get('url');
     if (empty($tested_url)) {
-      $tested_url = Url::fromRoute('<current>', [], ['asbolute' => TRUE])->toString();
+      $tested_url = Url::fromRoute('<current>', [], ['absolute' => TRUE])->toString();
     }
 
     try {
@@ -76,7 +76,7 @@ class ReportController extends ControllerBase {
     }
     catch (ConfigException $e) {
       // The user has not provided they API key. Invite they to do so.
-      drupal_set_message($this->t('Wait! We are not able to generate a report while you do not provide us an API key! <a href=":api_settings">Fix it!</a>', [':api_settings' => Url::fromRoute('tenon_io.admin_settings')->toString()]), 'warning');
+      drupal_set_message($this->t('Unfortunately we are not able to generate a report untill you <a href=":api_settings">provide us an API key!</a>', [':api_settings' => Url::fromRoute('tenon_io.admin_settings')->toString()]), 'warning');
       $this->logger->warning('Page report: API request attempt without credentials.');
       throw new AccessDeniedHttpException();
     }
@@ -155,9 +155,9 @@ class ReportController extends ControllerBase {
     }
     catch (ConfigException $e) {
       // The user has not provided they API key. Invite they to do so.
-      $content = [
-        'content' => '<p>' . $this->t('Wait! We are not able to generate a report while you do not provide us an API key!') . '</p>',
-        'link' => Link::createFromRoute($this->t('Fix it!'), 'tenon_io.admin_settings')->toString(),
+        $content = [
+            'content' => '<p>' . $this->t('Unfortunately we are not able to generate a report untill you provide an API key!') . '</p>',
+            'link' => Link::createFromRoute($this->t('Provide an API key'), 'tenon_io.admin_settings')->toString(),
       ];
       $this->logger->warning('Page report: API request attempt without credentials.');
       return new AjaxResponse($content);
