@@ -1,0 +1,9 @@
+administer tenon settings:
+  title: Administer Tenon.io settings
+  description: Authorize users to configure the Tenon.io API settings.
+tenon trigger page report:
+  title: Trigger page report
+  description: Authorize the user to trigger a report from Tenon.io for the current page they browse.
+tenon trigger spider report:
+  title: Administer Tenon.io settings
+  description: Authorize the user to trigger a site spider report from Tenon.io.

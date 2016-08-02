@@ -1,0 +1,15 @@
+api:
+  endpoint: 'https://tenon.io/api/'
+  key: ''
+app_id: ''
+project_id: ''
+certainty: 0
+importance: 0
+level: 'AAA'
+priority: 0
+ref_information: TRUE
+store_information: FALSE
+browser:
+  user_agent: ''
+  width: 768
+  height: 1024

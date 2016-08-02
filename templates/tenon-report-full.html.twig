@@ -1,0 +1,46 @@
+{% if issues_count %}
+  <h2>{% trans %}Result Summary:{% endtrans %} ({{ report_url }})</h2>
+  <ul>
+    {% if error_count %}
+      <li>
+        <strong>{% trans %}Total Errors:{% endtrans %}</strong> {{ error_count }}
+      </li>
+    {% endif %}
+    {% if warning_count %}
+      <li>
+        <strong>{% trans %}Total Warnings:{% endtrans %}</strong> {{ warning_count }}
+      </li>
+    {% endif %}
+  </ul>
+  <h3>{% trans %}Issues by Level{% endtrans %}</h3>
+  <table>
+    <thead>
+    <tr>
+      <th scope="col">{% trans %}Level{% endtrans %}</th>
+      <th scope="col">{% trans %}Count{% endtrans %}</th>
+      <th scope="col">%</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr>
+      <th scope="row">A</th>
+      <td>{{ a_level_count }}</td>
+      <td>{{ a_level_percentage }}%</td>
+    </tr>
+    <tr>
+      <th scope="row">AA</th>
+      <td>{{ aa_level_count }}</td>
+      <td>{{ aa_level_percentage }}%</td>
+    </tr>
+    <tr>
+      <th scope="row">AAA</th>
+      <td>{{ aaa_level_count }}</td>
+      <td>{{ aaa_level_percentage }}%</td>
+    </tr>
+    </tbody>
+  </table>
+{% else %}
+  <p>
+    {% trans %}Congratulations, you do not have any warning or error on your page <strong>{{ tested_url }}</strong>.{% endtrans %}
+  </p>
+{% endif %}

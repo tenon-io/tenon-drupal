@@ -1,0 +1,137 @@
+<?php
+
+/**
+ * @file
+ * The module that tests your site accessibility with the Tenon.io API.
+ */
+
+// URL to Tenon.io API.
+use Drupal\Core\Url;
+
+define('TENON_IO_API_URL', 'https://tenon.io/api/');
+
+// Importance criteria.
+define('TENON_IO_IMPORTANCE_NONE', 0);
+define('TENON_IO_IMPORTANCE_LOW', 1);
+define('TENON_IO_IMPORTANCE_MEDIUM', 2);
+define('TENON_IO_IMPORTANCE_HIGH', 3);
+
+/**
+ * Implements hook_theme().
+ */
+function tenon_io_theme($existing, $type, $theme, $path) {
+  return [
+    'tenon_results_report_full' => [
+      'variables' => [
+        'report_url' => [],
+        'error_count' => 0,
+        'warning_count' => 0,
+        'issues_count' => 0,
+        'a_level_count' => 0,
+        'a_level_percentage' => 0,
+        'aa_level_count' => 0,
+        'aa_level_percentage' => 0,
+        'aaa_level_count' => 0,
+        'aaa_level_percentage' => 0,
+        'tested_url' => '',
+      ],
+      'template' => 'tenon-report-full',
+    ],
+    'tenon_results_report_summary' => [
+      'variables' => [
+        'error_count' => 0,
+        'warning_count' => 0,
+        'issues_count' => 0,
+      ],
+      'template' => 'tenon-report-summary',
+    ],
+  ];
+}
+
+/**
+ * Implements hook_toolbar().
+ *
+ * Adds the "Accessibility check" link in the toolbar.
+ */
+function tenon_io_toolbar() {
+  $items = [];
+
+  $url = Url::fromRoute('tenon_io.page');
+  $items['tenon_io'] = [
+    '#type' => 'toolbar_item',
+    'tab' => [
+      '#type' => 'link',
+      '#title' => t('Accessibility check'),
+      '#url' => $url,
+      '#access' => $url->access(),
+      '#options' => [
+        'query' => [
+          'url' => Url::fromRoute('<current>', [], ['absolute' => TRUE])->toString(),
+        ],
+      ],
+      '#attributes' => [
+        'title' => t('Check the accessibility of your page with Tenon.io.'),
+        'class' => [
+          'toolbar-icon',
+          'toolbar-icon-tenon-io',
+          'js-tenon-io-trigger',
+        ],
+      ],
+    ],
+    '#wrapper_attributes' => [
+      'class' => ['tenon-io-toolbar-tab'],
+    ],
+    '#weight' => 99,
+    '#attached' => [
+      'library' => [
+        'tenon_io/admin.icons',
+      ],
+    ],
+  ];
+
+  return $items;
+}
+
+/**
+ * Implements hook_page_attachments_alter().
+ *
+ * Attaches JS & CSS libraries to the page if the toolbar module is enabled.
+ */
+function tenon_io_page_attachments_alter(&$attachments) {
+  $moduleHandler = \Drupal::moduleHandler();
+  if ($moduleHandler->moduleExists('toolbar')) {
+    // Check if the hopscotch library has been installed.
+    $hopscotch = \Drupal::service('library.discovery')->getLibraryByName('tenon_io', 'hopscotch');
+    if (!isset($hopscotch['js'][0]['data']) || !file_exists($hopscotch['js'][0]['data'])) {
+      return;
+    }
+
+    // Extract the potential existing report count from cache.
+    $tested_url = Url::fromRoute('<current>', [], ['absolute' => TRUE]);
+    $issues_count_cache = \Drupal::service('tenon_io')->getIssuesCountFromCache($tested_url->toString());
+
+    // Attach the libraries with their settings.
+    $config = \Drupal::config('tenon_io.settings');
+    $settings = [
+      'key'             => $config->get('api.key'),
+      'url'             => $tested_url->toString(),
+      'appId'           => $config->get('app_id'),
+      'projectID'       => $config->get('project_id'),
+      'certainty'       => $config->get('certainty'),
+      'importance'      => $config->get('importance'),
+      'level'           => $config->get('level'),
+      'priority'        => $config->get('priority'),
+      'ref'             => $config->get('ref_information'),
+      'store'           => $config->get('store_information'),
+      'uaString'        => $config->get('browser.user_agent'),
+      'viewPortHeight'  => $config->get('browser.height'),
+      'viewPortWidth'   => $config->get('browser.width'),
+      'moduleBasePath'  => base_path() . drupal_get_path('module', 'tenon_io'),
+      'issuesCount'     => $issues_count_cache,
+    ];
+    $attachments['#attached']['drupalSettings']['tenon_io'] = $settings;
+
+    $attachments['#attached']['library'][] = 'tenon_io/hopscotch';
+    $attachments['#attached']['library'][] = 'tenon_io/tenon_io';
+  }
+}

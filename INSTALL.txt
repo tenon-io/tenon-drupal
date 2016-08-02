@@ -1,0 +1,13 @@
+INSTALLATION
+============
+
+In order to use the full potential of the module, you need to download and
+unpack the Hopscotch library.
+
+1. Get the library: https://github.com/linkedin/hopscotch (version 1.2)
+2. Unpack it in /libraries. You should have the file hopscotch-0.1.2.js
+   matching the path /libraries/hopscotch/js/hopscotch-0.1.2.js.min
+3. Enable the Tenon.io module in admin/modules.
+4. Configure your Tenon.io API key and settings in
+   admin/config/services/tenon-io.
+5. Enjoy!

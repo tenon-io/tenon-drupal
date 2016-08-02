@@ -1,0 +1,52 @@
+
+tenon_io.settings:
+  type: config_object
+  label: 'Tenon.io settings'
+  mapping:
+    api:
+      type: mapping
+      label: 'API related settings'
+      mapping:
+        endpoint:
+          type: string
+          label: 'API endpoint URL'
+        key:
+          type: string
+          label: 'API key'
+    app_id:
+      type: string
+      label: 'App ID'
+    project_id:
+      type: string
+      label: 'Project ID'
+    certainty:
+      type: integer
+      label: 'Certainty'
+    importance:
+      type: integer
+      label: 'Importance'
+    level:
+      type: string
+      label: 'Level'
+    priority:
+      type: integer
+      label: 'Priority'
+    ref_information:
+      type: boolean
+      label: 'Reference information'
+    store_information:
+      type: boolean
+      label: 'Store information'
+    browser:
+      type: mapping
+      label: 'Headless browser settings'
+      mapping:
+        user_agent:
+          type: string
+          label: 'Browser user-agent'
+        width:
+          type: integer
+          label: 'Viewport width'
+        height:
+          type: integer
+          label: 'Viewport height'

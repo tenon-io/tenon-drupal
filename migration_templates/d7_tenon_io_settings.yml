@@ -1,0 +1,37 @@
+if: d7_tenon_io_settings
+label: Tenon IO configuration
+migration_tags:
+  - Drupal 7
+source:
+  plugin: variable
+  variables:
+    - tenon_api_endpoint_page
+    - tenon_api_key
+    - tenon_app_id
+    - tenon_project_id
+    - tenon_certainty
+    - tenon_importance
+    - tenon_level
+    - tenon_priority
+    - tenon_ref_information
+    - tenon_store_information
+    - tenon_ua_string
+    - tenon_viewport_width
+    - tenon_viewport_height
+process:
+  'api/endpoint': tenon_api_endpoint_page
+  'api/key': tenon_api_key
+  app_id: tenon_app_id
+  project_id: tenon_project_id
+  certainty: tenon_certainty
+  importance: tenon_importance
+  level: tenon_level
+  priority: tenon_priority
+  ref_information: tenon_ref_information
+  store_information: tenon_store_information
+  'browser/user_agent': tenon_ua_string
+  'browser/width': tenon_viewport_width
+  'browser/height': tenon_viewport_height
+destination:
+  plugin: config
+  config_name: tenon_io.settings

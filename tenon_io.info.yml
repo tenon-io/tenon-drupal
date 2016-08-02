@@ -1,0 +1,6 @@
+name: Tenon.io
+description: Test your site accessibility with Tenon.io.
+core: 8.x
+type: module
+package: Accessibility
+configure: tenon_io.admin_settings

@@ -1,0 +1,24 @@
+{
+  "name": "drupal/tenon_io",
+  "description": "Checks Drupal websites for accessibility using Tenon.io",
+  "type": "drupal-module",
+  "license": "MIT",
+  "support": {
+    "issues": "https://drupal.org/project/issues/tenon_io",
+    "source": "https://drupal.org/project/tenon_io"
+  },
+  "authors": [
+    {
+      "name": "Karl Groves",
+      "email": "karl@karlgroves.com"
+    },
+    {
+      "name": "Julien Dubois",
+      "email": "julien@happyculture.coop"
+    },
+    {
+      "name": "Edouard Cunibil",
+      "email": "edouard@happyculture.coop"
+    }
+  ]
+}

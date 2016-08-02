@@ -1,0 +1,5 @@
+tenon_io.admin_settings:
+  title: 'Tenon.io settings'
+  parent: system.admin_config_services
+  description: 'Administer Tenon.io API connection settings.'
+  route_name: tenon_io.admin_settings

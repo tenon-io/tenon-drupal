@@ -1,0 +1,19 @@
+{% if issues_count %}
+  <h5>{% trans %}Result Summary:{% endtrans %}</h5>
+  <ul>
+    {% if error_count %}
+      <li>
+        <strong>{% trans %}Total Errors:{% endtrans %}</strong> {{ error_count }}
+      </li>
+    {% endif %}
+    {% if warning_count %}
+      <li>
+        <strong>{% trans %}Total Warnings:{% endtrans %}</strong> {{ warning_count }}
+      </li>
+    {% endif %}
+  </ul>
+{% else %}
+  <p>
+    {% trans %}Congratulations, you do not have any warning or error on your page.{% endtrans %}
+  </p>
+{% endif %}

@@ -1,0 +1,33 @@
+tenon_io:
+  version: 2.0.0
+  css:
+    theme:
+      css/tenon_io.css: {}
+  js:
+    js/tenon_io.js: {}
+  drupalSettings:
+    tenon_io: []
+  dependencies:
+    - core/jquery
+    - core/jquery.once
+    - core/drupal.ajax
+    - core/drupalSettings
+
+admin.icons:
+  version: 2.0.0
+  css:
+    theme:
+      css/icons.admin.css: {}
+
+hopscotch:
+  remote: 'https://github.com/linkedin/hopscotch'
+  version: 0.1.2
+  license:
+    name: Apache 2.0
+    url: https://github.com/linkedin/hopscotch/blob/master/LICENSE
+    gpl-compatible: true
+  css:
+    theme:
+      /libraries/hopscotch/css/hopscotch-0.1.2.min.css: {}
+  js:
+    /libraries/hopscotch/js/hopscotch-0.1.2.min.js: {}

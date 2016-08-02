@@ -1,0 +1,16 @@
+<?php
+
+/**
+ * @file
+ * Install, update and uninstall functions for the tenon_io module.
+ */
+
+use Drupal\Core\Url;
+
+/**
+ * Implements hook_install().
+ */
+function tenon_io_install() {
+  $settingsUrl = Url::fromRoute('tenon_io.admin_settings');
+  drupal_set_message(t('Thank you for installing the Tenon.io connector. Please <a href=":api_settings">setup your connection to our API.</a>', [':api_settings' => $settingsUrl->toString()]));
+}

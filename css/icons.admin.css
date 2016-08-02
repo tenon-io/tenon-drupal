@@ -1,0 +1,14 @@
+/**
+ * @file
+ * Styling for the tenon_io module icons.
+ */
+
+/**
+ * Toolbar tab icon.
+ */
+.toolbar-bar .toolbar-icon-tenon-io:before {
+  background-image: url(../images/logo_tenon.png);
+}
+.adminimal-admin-toolbar .toolbar-oriented .tenon-io-toolbar-tab {
+  float: right;
+}

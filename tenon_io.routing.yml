@@ -1,0 +1,22 @@
+tenon_io.admin_settings:
+  path: '/admin/config/services/tenon-io'
+  defaults:
+    _form: '\Drupal\tenon_io\Form\AdminSettings'
+    _title: 'Tenon.io settings'
+    _description: 'Administer Tenon.io API connection settings.'
+  requirements:
+    _permission: 'administer tenon settings'
+tenon_io.page:
+  path: '/tenon_io/page'
+  defaults:
+    _controller: '\Drupal\tenon_io\Controller\ReportController::page'
+    _title: 'Page report'
+  requirements:
+    _permission: 'tenon trigger page report'
+tenon_io.ajax_page:
+  path: '/tenon_io/ajax/page'
+  defaults:
+    _controller: '\Drupal\tenon_io\Controller\ReportController::ajaxPage'
+    _title: 'Ajax test'
+  requirements:
+    _permission: 'tenon trigger page report'

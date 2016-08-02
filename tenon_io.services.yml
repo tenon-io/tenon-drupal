@@ -1,0 +1,7 @@
+services:
+  logger.channel.tenon_io:
+    parent: logger.channel_base
+    arguments: ['tenon_io']
+  tenon_io:
+    class: Drupal\tenon_io\Service\TenonIo
+    arguments: ['@config.factory', '@http_client', '@cache.default']
