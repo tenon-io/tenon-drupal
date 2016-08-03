@@ -155,9 +155,9 @@ class ReportController extends ControllerBase {
     }
     catch (ConfigException $e) {
       // The user has not provided they API key. Invite they to do so.
-        $content = [
-            'content' => '<p>' . $this->t('Unfortunately we are not able to generate a report untill you provide an API key!') . '</p>',
-            'link' => Link::createFromRoute($this->t('Provide an API key'), 'tenon_io.admin_settings')->toString(),
+      $content = [
+        'content' => '<p>' . $this->t('Unfortunately we are not able to generate a report untill you provide an API key!') . '</p>',
+        'link' => Link::createFromRoute($this->t('Provide an API key'), 'tenon_io.admin_settings')->toString(),
       ];
       $this->logger->warning('Page report: API request attempt without credentials.');
       return new AjaxResponse($content);
