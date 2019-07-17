@@ -1,4 +1,4 @@
-#Tenon Drupal Module
+# Tenon Drupal Module
 
 Note: This module supports both Drupal and Open Scholar
 
